@@ -39,8 +39,8 @@
 
     <!-- The theme of the start button on the user frame -->
     <style name="StartButton" parent="Widget.AppCompat.Button.Borderless">
-        <item name="android:colorButtonNormal">@color/red</item>
-        <item name="android:colorControlHighlight">@color/red</item>
+        <item name="android:colorButtonNormal">#42a5f5</item>
+        <item name="android:colorControlHighlight">#42a5f5</item>
         <item name="android:textColor">@color/almond</item>
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:textSize">50sp</item>
