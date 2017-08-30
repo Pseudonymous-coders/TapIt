@@ -1,52 +1,69 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/black"
+    android:background="@color/colorPrimary"
     tools:context="org.pseudonymous.tapit.MainActivity">
+
+    <TextView
+        android:id="@+id/CurScoreHeader"
+        android:text="SCORE"
+        app:layout_widthPercent="60%"
+        app:layout_heightPercent="7%"
+        android:paddingLeft="10dp"
+        android:theme="@style/CurScoreHeader"
+        />
+    <TextView
+        android:id="@+id/HighScoreHeader"
+        android:text="HIGH SCORE"
+        android:gravity="right"
+        app:layout_widthPercent="40%"
+        app:layout_heightPercent="5%"
+        android:paddingRight="10dp"
+        android:theme="@style/HighScoreHeader"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true" />
+    <TextView
+        android:id="@+id/CurScore"
+        android:layout_below="@id/CurScoreHeader"
+        app:layout_widthPercent="60%"
+        app:layout_heightPercent="17%"
+        android:paddingTop="15dp"
+        android:paddingLeft="5dp"
+        android:theme="@style/CurScore"
+        android:text="000"
+        />
+    <TextView
+        android:id="@+id/HighScore"
+        android:layout_toRightOf="@id/CurScore"
+        android:layout_below="@id/HighScoreHeader"
+        android:gravity="right"
+        android:paddingTop="10dp"
+        app:layout_widthPercent="40%"
+        app:layout_heightPercent="10%"
+        android:theme="@style/HighScore"
+        android:text="000"
+        />
 
     <!-- This is the game layout containing the following
             * The current score
             * The highest score
             * The actual circles (called <insert name>)
     -->
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/game_frame">
-        <TextView
-            android:id="@+id/fullscreen_content"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:keepScreenOn="true"
-            android:text="haha"
-            android:textColor="#33b5e5"
-            android:textSize="50sp"
-            android:textStyle="bold" />
-    </FrameLayout>
 
     <!-- This is the start screen overlay which disappears when the game starts, and contains the following
         * The start button
         * The settings
         * The current user details
     -->
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/user_frame">
-
-        <!--style="@style/Widget.AppCompat.Button.Borderless.Colored"-->
-
-        <requestFocus/>
-    </FrameLayout>
-
     <Button
         android:layout_width="match_parent"
+        app:layout_heightPercent="30%"
+        android:layout_alignParentBottom="true"
         android:layout_height="200dp"
         android:layout_gravity="bottom"
         android:text="start"
-
         android:theme="@style/StartButton" />
-</FrameLayout>
+
+</android.support.percent.PercentRelativeLayout>
