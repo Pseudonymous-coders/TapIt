@@ -4,8 +4,9 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/colorPrimary"
+    android:id="@+id/fullscreen_content"
     tools:context="org.pseudonymous.tapit.MainActivity">
-
+    <!--
     <android.support.percent.PercentRelativeLayout
         android:id="@+id/GameHeader"
         android:layout_width="match_parent"
@@ -51,15 +52,16 @@
             android:text="000"
             />
     </android.support.percent.PercentRelativeLayout>
+    -->
 
-    <View
+    <org.pseudonymous.tapit.engine.GameSurfaceView
         android:id="@+id/GameZone"
-        android:layout_below="@id/GameHeader"
         app:layout_heightPercent="100%"
+        android:layout_height="match_parent"
         android:layout_width="match_parent"
         >
 
-    </View>
+    </org.pseudonymous.tapit.engine.GameSurfaceView>
 
     <!-- This is the game layout containing the following
             * The current score
