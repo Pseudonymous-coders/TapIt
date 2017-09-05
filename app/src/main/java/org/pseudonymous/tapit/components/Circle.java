@@ -1,9 +1,17 @@
 package org.pseudonymous.tapit.components;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.animation.AccelerateInterpolator;
 
+import org.pseudonymous.tapit.configs.Logger;
 import org.pseudonymous.tapit.engine.Engine;
 
 /**
@@ -13,6 +21,15 @@ import org.pseudonymous.tapit.engine.Engine;
 public class Circle {
     private int x, y, r, c, pW, pH;
     private float sX, sY, sR;
+    private ValueAnimator out, in;
+    private boolean clickedOn = false;
+
+    public interface CircleEvents {
+        void onClick();
+        void onDestroyed();
+    }
+
+    private CircleEvents circleEvents;
 
     public Circle(int c) {
         this.c = c;
@@ -25,6 +42,10 @@ public class Circle {
 
     public void inheritParentAttributes(Engine engine) {
         this.setParentDims(engine.getWidth(), engine.getHeight());
+    }
+
+    public void setCircleEvents(CircleEvents events) {
+        this.circleEvents = events;
     }
 
     public void setPosition(int x, int y) {
@@ -74,6 +95,75 @@ public class Circle {
 
     public void setColor(int c) {
         this.c = c;
+    }
+
+    public void emitTouchEvent(float xTouch, float yTouch) {
+        double distanceFromCenter = Math.sqrt(Math.pow(Math.abs(this.x - xTouch), 2) + Math.pow(Math.abs(this.y - yTouch), 2));
+        if((int) distanceFromCenter < this.r && this.circleEvents != null) {
+            this.circleEvents.onClick();
+            clickedOn = true;
+        }
+    }
+
+    public void startAnimation(float maxScaledRadius, int outDuration, final int waitDuration, int inDuration) {
+        out = ValueAnimator.ofFloat(this.getScaledRadius(), maxScaledRadius);
+        in = ValueAnimator.ofFloat(maxScaledRadius, 0);
+
+        ValueAnimator.AnimatorUpdateListener updateListener = new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                float value = (float) valueAnimator.getAnimatedValue();
+                setScaledRadius(value); //Update the scaled radius to hit the max value
+            }
+        };
+
+        out.addUpdateListener(updateListener);
+        out.setInterpolator(new AccelerateInterpolator());
+        out.setDuration(outDuration);
+
+        in.addUpdateListener(updateListener);
+        in.setInterpolator(new AccelerateInterpolator());
+        in.setDuration(inDuration);
+
+        out.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                Thread waitThread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(waitDuration);
+                            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    in.start();
+                                }
+                            });
+                        } catch (InterruptedException ignored) {}
+                    }
+                });
+                waitThread.setDaemon(true);
+                waitThread.setName("AnimationWaitThread");
+                waitThread.start();
+            }
+        });
+
+        in.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                if(circleEvents != null && !clickedOn) circleEvents.onDestroyed();
+            }
+        });
+
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                Logger.Log("STARTING THE ANIMATION");
+                out.start();
+            }
+        });
     }
 
     public void drawToCanvas(Canvas canvas) {

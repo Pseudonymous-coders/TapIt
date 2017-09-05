@@ -53,6 +53,10 @@ public class TickEvent {
         this.drawLoop = drawLoop;
     }
 
+    public List<Circle> getAllCircles() {
+        return this.circles;
+    }
+
     void canvasDrawLoop(Engine engine, Canvas canvas) {
         if (this.drawLoop != null) {
             this.circles = this.drawLoop.onDrawLoop(engine, this.circles);

@@ -3,8 +3,13 @@ package org.pseudonymous.tapit.engine;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
+
+import org.pseudonymous.tapit.components.Circle;
+import org.pseudonymous.tapit.configs.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +18,7 @@ import java.util.List;
  * Created by smerkous on 9/3/17.
  */
 
-public class GameSurfaceView extends SurfaceView {
+public class GameSurfaceView extends SurfaceView implements View.OnTouchListener {
     private SurfaceHolder holder;
     private Engine gameEngine;
     private List<TickEvent> tickEvents;
@@ -48,6 +53,10 @@ public class GameSurfaceView extends SurfaceView {
     public void pseudoConstructor(Context context) {
         gameEngine = new Engine(this);
         this.tickEvents = new ArrayList<>();
+
+        setFocusable(true);
+        setFocusableInTouchMode(true);
+        setOnTouchListener(this);
     }
 
     public void setTicksPerSecond(int ticksPerSecond) {
@@ -104,6 +113,22 @@ public class GameSurfaceView extends SurfaceView {
             event.engineTicked(this.gameEngine);
             event.canvasDrawLoop(this.gameEngine, canvas);
         }
+    }
+
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+        if(motionEvent.getAction() != MotionEvent.ACTION_DOWN) return true;
+        float xTouch = motionEvent.getX(0);
+        float yTouch = motionEvent.getY(0);
+
+        Logger.Log("GameSurfaceView touched (x: %.2f, y: %.2f)", xTouch, yTouch);
+
+        for(TickEvent event : this.tickEvents) {
+            for(Circle circle : event.getAllCircles()) {
+                circle.emitTouchEvent(xTouch, yTouch);
+            }
+        }
+        return true;
     }
 
     public void pauseEngine() {

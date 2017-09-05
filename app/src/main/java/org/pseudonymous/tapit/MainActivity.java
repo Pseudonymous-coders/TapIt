@@ -1,5 +1,8 @@
 package org.pseudonymous.tapit;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -13,6 +16,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.LinearInterpolator;
+import android.widget.Button;
 
 import org.pseudonymous.tapit.components.Circle;
 import org.pseudonymous.tapit.configs.Logger;
@@ -20,6 +25,7 @@ import org.pseudonymous.tapit.engine.Engine;
 import org.pseudonymous.tapit.engine.GameSurfaceView;
 import org.pseudonymous.tapit.engine.TickEvent;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -47,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
 
     private View mContentView;
     private View mControlsView;
+    private Button startButton;
     private boolean mVisible;
     private String appName = "TapIt";
 
@@ -69,6 +76,48 @@ public class MainActivity extends AppCompatActivity {
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
         );
 
+        final ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, -300f);
+        final ValueAnimator downAnimator = ValueAnimator.ofFloat(-300f, 600f);
+
+        valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                float value = (float) valueAnimator.getAnimatedValue();
+                startButton.setTranslationY(value);
+            }
+        });
+
+        downAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                float value = (float) valueAnimator.getAnimatedValue();
+                startButton.setTranslationY(value);
+            }
+        });
+
+        valueAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                downAnimator.start();
+            }
+        });
+
+        valueAnimator.setInterpolator(new LinearInterpolator());
+        valueAnimator.setDuration(300);
+
+        downAnimator.setInterpolator(new LinearInterpolator());
+        valueAnimator.setDuration(1500);
+
+        startButton = findViewById(R.id.start_button);
+        startButton.setVisibility(View.INVISIBLE);
+        startButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                valueAnimator.start();
+            }
+        });
+
         GameSurfaceView sf = findViewById(R.id.GameZone);
         sf.setTicksPerSecond(30);
         sf.setBackgroundColor(Color.BLACK);
@@ -78,33 +127,40 @@ public class MainActivity extends AppCompatActivity {
         circleHandler.setDrawLoop(new TickEvent.DrawLoop() {
             @Override
             public List<Circle> onDrawLoop(Engine engine, List<Circle> circles) {
-                if (engine.getElapsedTime() > 4000) {
+                List<Circle> newCircles = new ArrayList<>();
+                newCircles.addAll(circles);
+                if (engine.getElapsedTime() > 4000 && radius[0] == 1) {
                     Circle toAdd = new Circle(Color.RED);
                     toAdd.inheritParentAttributes(engine);
-                    toAdd.setScaledPosition(0.1f, 0.1f);
-                    toAdd.setScaledRadius(0.1f);
-                    circles.add(toAdd);
-                }
+                    toAdd.setCircleEvents(new Circle.CircleEvents() {
+                        @Override
+                        public void onClick() {
+                            Logger.Log("THE CIRCLE WAS CLICKED ON");
+                        }
 
-                if (engine.getElapsedTime() > 6000) {
-                    for (int ind = 0; ind < circles.size(); ind++) {
-                        Circle c = circles.get(ind);
-                        c.setScaledRadius(c.getScaledRadius() - 0.05f);
+                        @Override
+                        public void onDestroyed() {
+                            Logger.Log("The player lost!");
+                        }
+                    });
+                    toAdd.setScaledPosition(0.1f, 0.1f);
+                    toAdd.setScaledRadius(0.05f);
+                    newCircles.add(toAdd);
+                    radius[0] = 0;
+                } else if(engine.getElapsedTime() > 4000 && radius[0] == 0) {
+                    for(Circle circle : newCircles) {
+                        circle.startAnimation(0.5f, 500, 1000, 1000);
                     }
-                } else {
-                    for (int ind = 0; ind < circles.size(); ind++) {
-                        Circle c = circles.get(ind);
-                        c.setScaledRadius(c.getScaledRadius() + 0.05f);
-                    }
+                    radius[0] = 2;
                 }
-                return circles;
+                return newCircles;
             }
         });
 
         circleHandler.setAttachedEvent(new TickEvent.AttachedEvent() {
             @Override
             public void onEvent(Engine engine, long elapsedTime) {
-                Logger.Log("SAMPLE EVENT CALLED %d", elapsedTime);
+                //Logger.Log("SAMPLE EVENT CALLED %d", elapsedTime);
             }
         });
 

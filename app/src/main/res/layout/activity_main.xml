@@ -81,6 +81,7 @@
         android:layout_height="200dp"
         android:layout_gravity="bottom"
         android:text="start"
-        android:theme="@style/StartButton" />
+        android:theme="@style/StartButton"
+        android:id="@+id/start_button"/>
 
 </android.support.percent.PercentRelativeLayout>
