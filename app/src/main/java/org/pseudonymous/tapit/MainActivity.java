@@ -120,17 +120,18 @@ public class MainActivity extends AppCompatActivity {
 
         GameSurfaceView sf = findViewById(R.id.GameZone);
         sf.setTicksPerSecond(30);
-        sf.setBackgroundColor(Color.BLACK);
+        sf.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
 
         final int[] radius = {1};
         final TickEvent circleHandler = new TickEvent(10f); //Happens every 500 milliseconds (1/2)
+
         circleHandler.setDrawLoop(new TickEvent.DrawLoop() {
             @Override
             public List<Circle> onDrawLoop(Engine engine, List<Circle> circles) {
                 List<Circle> newCircles = new ArrayList<>();
                 newCircles.addAll(circles);
                 if (engine.getElapsedTime() > 4000 && radius[0] == 1) {
-                    Circle toAdd = new Circle(Color.RED);
+                    Circle toAdd = new Circle(getResources().getColor(R.color.circleColor));
                     toAdd.inheritParentAttributes(engine);
                     toAdd.setCircleEvents(new Circle.CircleEvents() {
                         @Override
@@ -149,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
                     radius[0] = 0;
                 } else if(engine.getElapsedTime() > 4000 && radius[0] == 0) {
                     for(Circle circle : newCircles) {
-                        circle.startAnimation(0.5f, 500, 1000, 1000);
+                        circle.startAnimation(0.5f, 200, 1000, 200);
                     }
                     radius[0] = 2;
                 }
