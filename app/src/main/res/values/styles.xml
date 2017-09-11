@@ -15,33 +15,32 @@
         <item name="metaButtonBarButtonStyle">?android:attr/buttonBarButtonStyle</item>
     </style>
 
-    <style name="CurScoreHeader" parent="android:TextAppearance.Widget.TextView">
-        <item name="android:textColor">@color/brown</item>
+    <style name="baseHeader" parent="android:Widget.TextView">
+        <item name="android:textColor">@color/green</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="CurScoreHeader" parent="baseHeader">
         <item name="android:textSize">30sp</item>
     </style>
 
-    <style name="HighScoreHeader" parent="android:TextAppearance.Widget.TextView">
-        <item name="android:textColor">@color/brown</item>
+    <style name="HighScoreHeader" parent="baseHeader">
         <item name="android:textSize">15sp</item>
     </style>
 
-    <style name="CurScore" parent="android:TextAppearance.Widget.TextView">
-        <item name="android:textColor">@color/brown</item>
+    <style name="CurScore" parent="baseHeader">
         <item name="android:textSize">70sp</item>
-        <item name="android:fontFamily">sans-serif</item>
     </style>
 
-    <style name="HighScore" parent="android:TextAppearance.Widget.TextView">
-        <item name="android:textColor">@color/brown</item>
+    <style name="HighScore" parent="baseHeader">
         <item name="android:textSize">30sp</item>
-        <item name="android:fontFamily">sans-serif</item>
     </style>
 
     <!-- The theme of the start button on the user frame -->
     <style name="StartButton" parent="Widget.AppCompat.Button.Borderless">
-        <item name="android:colorButtonNormal">#42a5f5</item>
-        <item name="android:colorControlHighlight">#42a5f5</item>
-        <item name="android:textColor">@color/almond</item>
+        <item name="android:colorButtonNormal">@color/green</item>
+        <item name="android:colorControlHighlight">@color/green</item>
+        <item name="android:textColor">@color/colorPrimaryDark</item>
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:textSize">50sp</item>
         <item name="android:background">?android:attr/selectableItemBackground</item>

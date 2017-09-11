@@ -20,6 +20,7 @@ import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 
 import org.pseudonymous.tapit.components.Circle;
+import org.pseudonymous.tapit.configs.Configs;
 import org.pseudonymous.tapit.configs.Logger;
 import org.pseudonymous.tapit.engine.Engine;
 import org.pseudonymous.tapit.engine.GameSurfaceView;
@@ -110,7 +111,6 @@ public class MainActivity extends AppCompatActivity {
         valueAnimator.setDuration(1500);
 
         startButton = findViewById(R.id.start_button);
-        startButton.setVisibility(View.INVISIBLE);
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -119,8 +119,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         GameSurfaceView sf = findViewById(R.id.GameZone);
-        sf.setTicksPerSecond(30);
-        sf.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+        sf.setTicksPerSecond(60);
+        sf.setBackgroundColor(Configs.getColor(R.color.colorPrimaryDark, this));
 
         final int[] radius = {1};
         final TickEvent circleHandler = new TickEvent(10f); //Happens every 500 milliseconds (1/2)
@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
                 List<Circle> newCircles = new ArrayList<>();
                 newCircles.addAll(circles);
                 if (engine.getElapsedTime() > 4000 && radius[0] == 1) {
-                    Circle toAdd = new Circle(getResources().getColor(R.color.circleColor));
+                    Circle toAdd = new Circle(getResources().getColor(R.color.colorPrimary));
                     toAdd.inheritParentAttributes(engine);
                     toAdd.setCircleEvents(new Circle.CircleEvents() {
                         @Override

@@ -82,8 +82,10 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
             @Override
             public void surfaceCreated(SurfaceHolder surfaceHolder) {
                 //Only start the game engine when
-                gameEngine.start();
-                gameEngine.setDims(getWidth(), getHeight());
+                try {
+                    gameEngine.start();
+                    gameEngine.setDims(getWidth(), getHeight());
+                } catch (Exception ignored){}
                 if (engineEventCallbacks != null) engineEventCallbacks.onStart();
             }
 

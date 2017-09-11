@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#455a64</color>
-    <color name="colorPrimaryDark">#455a64</color>
-    <color name="circleColor">#81D4FA</color>
+    <color name="colorPrimary">#222222</color>
+    <color name="colorPrimaryDark">#222222</color>
+    <color name="green">#86b817</color>
+    <color name="circleColor">@color/green</color>
     <color name="red">#d84315</color>
     <color name="tan">#D7CCC8</color>
     <color name="grey">#66000000</color>
