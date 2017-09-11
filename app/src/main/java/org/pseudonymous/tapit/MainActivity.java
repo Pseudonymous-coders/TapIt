@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
                 List<Circle> newCircles = new ArrayList<>();
                 newCircles.addAll(circles);
                 if (engine.getElapsedTime() > 4000 && radius[0] == 1) {
-                    Circle toAdd = new Circle(getResources().getColor(R.color.colorPrimary));
+                    Circle toAdd = new Circle(getResources().getColor(R.color.green));
                     toAdd.inheritParentAttributes(engine);
                     toAdd.setCircleEvents(new Circle.CircleEvents() {
                         @Override
@@ -144,13 +144,13 @@ public class MainActivity extends AppCompatActivity {
                             Logger.Log("The player lost!");
                         }
                     });
-                    toAdd.setScaledPosition(0.1f, 0.1f);
+                    toAdd.setScaledPosition(0.5f, 0.3f);
                     toAdd.setScaledRadius(0.05f);
                     newCircles.add(toAdd);
                     radius[0] = 0;
                 } else if(engine.getElapsedTime() > 4000 && radius[0] == 0) {
                     for(Circle circle : newCircles) {
-                        circle.startAnimation(0.5f, 200, 1000, 200);
+                        circle.startAnimation(0.2f, 200, 1000, 200);
                     }
                     radius[0] = 2;
                 }
@@ -192,7 +192,31 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void drawCircle(Integer x, Integer y){
 
+    // Not working, we need to revise how we draw circles and such...
+    private List<Circle> drawCircle(float x, float y, Engine engine, List<Circle> circles){
+        List<Circle> newCircles = new ArrayList<>();
+        newCircles.addAll(circles);
+
+        Circle circle = new Circle(getResources().getColor(R.color.green));
+        circle.inheritParentAttributes(engine);
+
+        circle.setCircleEvents(new Circle.CircleEvents() {
+            @Override
+            public void onClick() {
+                Logger.Log("THE CIRCLE WAS CLICKED ON");
+            }
+
+            @Override
+            public void onDestroyed() {
+                Logger.Log("The player lost!");
+            }
+        });
+        circle.setScaledPosition(x, y);
+        circle.setScaledRadius(0.05f);
+        newCircles.add(circle);
+        circle.startAnimation(0.2f, 200, 1000, 200);
+        return newCircles;
     }
+
 }
