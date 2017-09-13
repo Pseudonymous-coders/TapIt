@@ -26,9 +26,8 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
 
     public interface EngineEvents {
         void onStart();
-
         void onTick(Engine engine);
-
+        void onPaused();
         void onKilled();
     }
 
@@ -76,33 +75,6 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
         this.backgroundColor = backgroundColor;
     }
 
-    public void startEngine() {
-        holder = getHolder();
-        holder.addCallback(new SurfaceHolder.Callback() {
-            @Override
-            public void surfaceCreated(SurfaceHolder surfaceHolder) {
-                //Only start the game engine when
-                try {
-                    gameEngine.start();
-                    gameEngine.setDims(getWidth(), getHeight());
-                } catch (Exception ignored){}
-                if (engineEventCallbacks != null) engineEventCallbacks.onStart();
-            }
-
-            @Override
-            public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-                //Destroy the engine so that it doesn't call anymore events to the canvas
-                gameEngine.kill();
-                if (engineEventCallbacks != null) engineEventCallbacks.onKilled();
-            }
-        });
-    }
-
     @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
@@ -133,8 +105,37 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
         return true;
     }
 
+    public void startEngine() {
+        holder = getHolder();
+        holder.addCallback(new SurfaceHolder.Callback() {
+            @Override
+            public void surfaceCreated(SurfaceHolder surfaceHolder) {
+                //Only start the game engine when the surface has been created
+                if(gameEngine != null && gameEngine.is)
+
+                try {
+                    gameEngine.start();
+                    gameEngine.setDims(getWidth(), getHeight());
+                } catch (Exception ignored){}
+                if (engineEventCallbacks != null) engineEventCallbacks.onStart();
+            }
+
+            @Override
+            public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+                //Destroy the engine so that it doesn't call anymore events to the canvas
+                pauseEngine();
+            }
+        });
+    }
+
     public void pauseEngine() {
         this.gameEngine.pauseEngine();
+        if(engineEventCallbacks != null) engineEventCallbacks.onPaused();
     }
 
     public void continueEngine() {
@@ -142,6 +143,7 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
     }
 
     public void destroyEngine() {
-        this.gameEngine.kill();
+        this.gameEngine.killEngin();
+        if (engineEventCallbacks != null) engineEventCallbacks.onKilled();
     }
 }

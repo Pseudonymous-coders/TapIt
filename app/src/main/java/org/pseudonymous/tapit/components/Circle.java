@@ -16,6 +16,7 @@ import org.pseudonymous.tapit.engine.Engine;
 
 /**
  * Created by smerkous on 9/4/17.
+ *
  */
 
 public class Circle {
@@ -32,6 +33,11 @@ public class Circle {
     private CircleEvents circleEvents;
 
     public Circle(int c) {
+        this.c = c;
+    }
+
+    public Circle(Engine engine, int c) {
+        this.inheritParentAttributes(engine);
         this.c = c;
     }
 

@@ -59,10 +59,9 @@
         android:id="@+id/GameZone"
         app:layout_heightPercent="100%"
         android:layout_width="match_parent"
-        android:layout_below="@id/GameHeader">
+        android:layout_below="@id/GameHeader" />
 
-    </org.pseudonymous.tapit.engine.GameSurfaceView>
-    <Button
+    <org.pseudonymous.tapit.components.StartButton
         android:layout_width="match_parent"
         app:layout_heightPercent="30%"
         android:layout_alignParentBottom="true"

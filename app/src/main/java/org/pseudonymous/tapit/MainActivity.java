@@ -20,6 +20,7 @@ import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 
 import org.pseudonymous.tapit.components.Circle;
+import org.pseudonymous.tapit.components.StartButton;
 import org.pseudonymous.tapit.configs.Configs;
 import org.pseudonymous.tapit.configs.Logger;
 import org.pseudonymous.tapit.engine.Engine;
@@ -34,93 +35,48 @@ import java.util.List;
  * status bar and navigation/system bar) with user interaction.
  */
 public class MainActivity extends AppCompatActivity {
-    /**
-     * Whether or not the system UI should be auto-hidden after
-     * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
-     */
-    private static final boolean AUTO_HIDE = true;
-
-    /**
-     * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
-     * user interaction before hiding the system UI.
-     */
-    private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
-
-    /**
-     * Some older devices needs a small delay between UI widget updates
-     * and a change of the status and navigation bar.
-     */
-    private static final int UI_ANIMATION_DELAY = 300;
-
-    private View mContentView;
-    private View mControlsView;
-    private Button startButton;
-    private boolean mVisible;
-    private String appName = "TapIt";
+    private StartButton startButton;
+    private GameSurfaceView game;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        //Set the fullscreen flags and remove the title before setting the content view
+        Configs.setPreliminaryScreenFlags(this);
+
+        //Unwrap and attach the xml content view to the main activity
         setContentView(R.layout.activity_main);
 
-        mVisible = true;
-        mContentView = findViewById(R.id.fullscreen_content);
-        mContentView.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_IMMERSIVE
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-        );
+        //Set and lock the window orientation and size
+        Configs.setFullScreen(this);
+        Configs.lockRotation(this);
 
-        final ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, -300f);
-        final ValueAnimator downAnimator = ValueAnimator.ofFloat(-300f, 600f);
 
-        valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                float value = (float) valueAnimator.getAnimatedValue();
-                startButton.setTranslationY(value);
-            }
-        });
-
-        downAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                float value = (float) valueAnimator.getAnimatedValue();
-                startButton.setTranslationY(value);
-            }
-        });
-
-        valueAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                downAnimator.start();
-            }
-        });
-
-        valueAnimator.setInterpolator(new LinearInterpolator());
-        valueAnimator.setDuration(300);
-
-        downAnimator.setInterpolator(new LinearInterpolator());
-        valueAnimator.setDuration(1500);
-
+        //Define the start button and its click operation
         startButton = findViewById(R.id.start_button);
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                valueAnimator.start();
+                startButton.startAnimation();
             }
         });
 
-        GameSurfaceView sf = findViewById(R.id.GameZone);
-        sf.setTicksPerSecond(60);
-        sf.setBackgroundColor(Configs.getColor(R.color.colorPrimaryDark, this));
+
+        //Load the game surface view
+        game = findViewById(R.id.GameZone);
+        game.setTicksPerSecond(60);
+        game.setBackgroundColor(Configs.getColor(R.color.colorPrimaryDark, this));
+
+        startGame();
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+
+    }
+
+    protected void startGame() {
 
         final int[] radius = {1};
         final TickEvent circleHandler = new TickEvent(10f); //Happens every 500 milliseconds (1/2)
@@ -131,8 +87,7 @@ public class MainActivity extends AppCompatActivity {
                 List<Circle> newCircles = new ArrayList<>();
                 newCircles.addAll(circles);
                 if (engine.getElapsedTime() > 4000 && radius[0] == 1) {
-                    Circle toAdd = new Circle(getResources().getColor(R.color.green));
-                    toAdd.inheritParentAttributes(engine);
+                    Circle toAdd = new Circle(engine, Configs.getColor(R.color.green, MainActivity.this));
                     toAdd.setCircleEvents(new Circle.CircleEvents() {
                         @Override
                         public void onClick() {
@@ -165,8 +120,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        sf.addTickEvent(circleHandler);
-        sf.setGameCallbacks(new GameSurfaceView.EngineEvents() {
+        game.addTickEvent(circleHandler);
+        game.setGameCallbacks(new GameSurfaceView.EngineEvents() {
             @Override
             public void onStart() {
                 Logger.Log("The game engine has started");
@@ -183,13 +138,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        sf.startEngine();
-    }
-
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-
+        game.startEngine();
     }
 
 
