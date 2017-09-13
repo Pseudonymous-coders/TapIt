@@ -101,6 +101,13 @@ public class Engine extends Thread {
         this.pause = false;
     }
 
+	public void isPaused() {
+		return this.pause;
+	}
+
+	//public void s
+
+
     public void setCurrentView(Canvas currentView) {
         this.currentView = currentView;
     }
