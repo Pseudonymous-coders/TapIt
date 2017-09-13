@@ -111,7 +111,7 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
             @Override
             public void surfaceCreated(SurfaceHolder surfaceHolder) {
                 //Only start the game engine when the surface has been created
-                if(gameEngine != null && gameEngine.is)
+//                if(gameEngine != null && gameEngine.is)
 
                 try {
                     gameEngine.start();
@@ -143,7 +143,7 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
     }
 
     public void destroyEngine() {
-        this.gameEngine.killEngin();
+        this.gameEngine.killEngine();
         if (engineEventCallbacks != null) engineEventCallbacks.onKilled();
     }
 }

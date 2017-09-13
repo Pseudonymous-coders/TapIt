@@ -101,7 +101,7 @@ public class Engine extends Thread {
         this.pause = false;
     }
 
-	public void isPaused() {
+	public boolean isPaused() {
 		return this.pause;
 	}
 
@@ -136,5 +136,8 @@ public class Engine extends Thread {
         }
 
         Logger.LogWarning("Killing the engine (Reason: The kill method was called)");
+    }
+
+    public void killEngine() {
     }
 }

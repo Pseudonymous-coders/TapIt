@@ -133,6 +133,11 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
+            public void onPaused() {
+
+            }
+
+            @Override
             public void onKilled() {
                 Logger.Log("The game engine is destroyed");
             }
