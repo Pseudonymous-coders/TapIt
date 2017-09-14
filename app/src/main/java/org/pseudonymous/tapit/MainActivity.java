@@ -51,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
         Configs.setFullScreen(this);
         Configs.lockRotation(this);
 
-
         //Define the start button and its click operation
         startButton = findViewById(R.id.start_button);
         startButton.setOnClickListener(new View.OnClickListener() {
@@ -60,7 +59,6 @@ public class MainActivity extends AppCompatActivity {
                 startButton.startAnimation();
             }
         });
-
 
         //Load the game surface view
         game = findViewById(R.id.GameZone);

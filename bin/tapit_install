@@ -1,0 +1,23 @@
+#!/bin/bash
+
+echo "Installing TapIt to the device"
+
+FILE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PKG_NAME="org.pseudonymous.tapit"
+ACTIVITY_NAME="$PKG_NAME.MainActivity"
+APK_PATH="$FILE_DIR/../app/build/outputs/apk/debug/app-debug.apk"
+echo "$APK_PATH"
+
+printf "\nLooking for package $PKG_NAME... "
+if adb shell pm list packages | grep $PKG_NAME; then
+	printf "FOUND!\nUpdating... "
+	adb install -r $APK_PATH
+else
+	printf "NOT FOUND!\nInstalling... "
+	adb install $APK_PATH
+fi
+
+printf "Starting the activity... "
+adb shell am start -n "$PKG_NAME/$ACTIVITY_NAME"
+
+echo "Done"

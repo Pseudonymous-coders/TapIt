@@ -1,0 +1,41 @@
+#!/bin/bash
+
+SESSION="TapIt"
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
+RES_FOLDER="$PROJECT_DIR/app/src/main/res/layout/"
+JAVA_FOLDER="$PROJECT_DIR/app/src/main/java/org/pseudonymous/tapit"
+WINDOW_ONE_NAME="Source"
+WINDOW_TWO_NAME="Res"
+WINDOW_THREE_NAME="Deploy"
+
+tmux start-server
+
+tmux select-pane -t :1
+tmux new-session -d -s $SESSION -n $WINDOW_ONE_NAME
+tmux send-keys "cd $JAVA_FOLDER; vim MainActivity.java" C-m
+
+tmux split-window -t 1 -h -p 45 -c "$PROJECT_DIR"
+tmux select-pane -t 2
+tmux send-keys "cd $JAVA_FOLDER; vim engine/Engine.java" C-m
+
+tmux new-window
+tmux rename-window $WINDOW_TWO_NAME
+
+tmux split-window -t 1 -h -p 45 -c "$PROJECT_DIR"
+tmux select-pane -t 1
+tmux send-keys "cd $RES_FOLDER; vim activity_main.xml" C-m
+
+tmux select-pane -t 2
+tmux send-keys "cd $RES_FOLDER/..; vim ." C-m
+
+tmux new-window
+tmux rename-window $WINDOW_THREE_NAME
+
+tmux split-window -t 1 -v -p 80 -c "$PROJECT_DIR"
+tmux select-pane -t 1
+tmux send-keys "cd $PROJECT_DIR/bin; clear" C-m "adb connect :5555 # Run this to build and upload the app to the phone './tapit_deploy'"
+
+tmux select-pane -t 2
+tmux send-keys "cd $PROJECT_DIR/bin; clear" C-m "./tapit_logs"
+
+tmux -2 attach -t $SESSION

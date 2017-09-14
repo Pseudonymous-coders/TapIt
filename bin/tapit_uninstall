@@ -1,0 +1,15 @@
+#!/bin/bash
+
+echo "Uninstalling TapIt from the device"
+
+PKG_NAME="org.pseudonymous.tapit"
+
+printf "\nLooking for package $PKG_NAME... "
+if adb shell pm list packages | grep $PKG_NAME; then
+	printf "FOUND!\nUninstalling... "
+	adb uninstall $PKG_NAME
+else
+	printf "NOT FOUND!\n"
+fi
+
+echo "Done"

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
+CWD="$(pwd)"
+
+echo "Building TapIt"
+cd $PROJECT_DIR
+./gradlew assembleDebug
+cd $CWD
+echo "Done"
