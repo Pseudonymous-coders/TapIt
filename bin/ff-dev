@@ -4,5 +4,6 @@ curbranch=$(git rev-parse --abbrev-ref HEAD)
 
 git checkout dev
 git merge $curbranch --ff-only
+git push origin dev
 git checkout $curbranch
 
