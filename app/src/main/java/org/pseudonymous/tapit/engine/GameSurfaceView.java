@@ -120,7 +120,7 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
        for(CircleProps props : circles) {
             Circle circle = new Circle(this.gameEngine, props.getColor());
             //Temporarily set the circle its max size so we can compare its distance to the other circles
-            circle.setScaledRadius(props.getRadius);
+            circle.setScaledRadius(props.getRadius());
             int sR = circle.getRadius();
 
             for(Circle c : this.circles) {

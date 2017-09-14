@@ -1,3 +1,5 @@
+package org.pseudonymous.tapit.configs;
+
 public class CircleProps {
     private int c, w;
     private float r;

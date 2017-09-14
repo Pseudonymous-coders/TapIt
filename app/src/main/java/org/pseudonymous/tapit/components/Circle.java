@@ -87,7 +87,7 @@ public class Circle {
     public float distanceFrom(Circle otherCircle) {
         int dX = Math.abs(otherCircle.getXPosition() - this.getXPosition());
         int dY = Math.abs(otherCircle.getYPosition() - this.getYPosition());
-        return Math.sqrt(Math.pow(dX, 2) + Math.pow(dY, 2));
+        return (float) Math.sqrt(Math.pow(dX, 2) + Math.pow(dY, 2));
     }
 
     public int getXPosition() {
