@@ -1,0 +1,8 @@
+#! /bin/bash
+
+curbranch = $(git rev-parse --abbrev-ref HEAD)
+
+git checkout dev
+git pull origin dev
+git checkout $curbranch
+git rebase dev
