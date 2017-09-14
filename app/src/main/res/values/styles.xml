@@ -35,6 +35,20 @@
     <style name="HighScore" parent="baseHeader">
         <item name="android:textSize">30sp</item>
     </style>
+    
+    <style name="SettingsCog" parent="android:Widget.ImageButton">
+        <item name="android:background">@color/green</item>
+    </style>
+    
+    <style name="baseSettingsButton" parent="Widget.AppCompat.Button.Borderless">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textSize">75sp</item>
+        <item name="android:textColor">@color/almond</item>
+    </style>
+
+    <style name="restartButton" parent="baseSettingsButton">
+        <item name="android:background">@color/green</item>
+    </style>
 
     <!-- The theme of the start button on the user frame -->
     <style name="StartButton" parent="Widget.AppCompat.Button.Borderless">

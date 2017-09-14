@@ -36,14 +36,6 @@ public class StartButton extends android.support.v7.widget.AppCompatButton {
         final int buttonHeight = this.getHeight();
         final ValueAnimator downAnimator = ValueAnimator.ofFloat(0, buttonHeight);
 
-//        valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-//            @Override
-//            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-//                float value = (float) valueAnimator.getAnimatedValue();
-//                setTranslationY(value);
-//            }
-//        });
-
         downAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {

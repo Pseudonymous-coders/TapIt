@@ -10,4 +10,5 @@
     <color name="light_blue">#81D4FA</color>
     <color name="brown">#D7CCC8</color>
     <color name="almond">#fafafa</color>
+    <color name="white">#fff</color>
 </resources>

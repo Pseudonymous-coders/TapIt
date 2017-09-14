@@ -1,6 +1,6 @@
 <android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+    android:layout_width="fill_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/fullscreen_content"
@@ -13,10 +13,18 @@
         app:layout_heightPercent="20%"
         android:background="@color/colorPrimaryDark"
         >
+        <ImageButton
+            android:id="@+id/SettingsButton"
+            app:layout_widthPercent="20%"
+            app:layout_heightPercent="50%"
+            android:layout_toRightOf="@+id/CurScoreHeader"
+            android:theme="@style/SettingsCog"
+            android:src="@drawable/cog"
+            />
         <TextView
             android:id="@+id/CurScoreHeader"
             android:text="SCORE"
-            app:layout_widthPercent="60%"
+            app:layout_widthPercent="40%"
             app:layout_heightPercent="35%"
             android:paddingLeft="10dp"
             android:theme="@style/CurScoreHeader"
@@ -62,7 +70,7 @@
         android:layout_below="@id/GameHeader" />
 
     <org.pseudonymous.tapit.components.StartButton
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         app:layout_heightPercent="30%"
         android:layout_alignParentBottom="true"
         android:layout_height="200dp"
