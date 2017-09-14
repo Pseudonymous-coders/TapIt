@@ -10,6 +10,7 @@ import android.view.View;
 
 import org.pseudonymous.tapit.components.Circle;
 import org.pseudonymous.tapit.configs.Logger;
+import org.pseudonymous.tapit.configs.CircleProps;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +23,15 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
     private SurfaceHolder holder;
     private Engine gameEngine;
     private List<TickEvent> tickEvents;
+    private List<Circle> circles;
     private int backgroundColor;
+    private long circleId = 0;
+    private float padding = 0.01f;
+
+    public interface PlayerEvents {
+        void onClicked(Circle circle);
+        void onDestroyed(Circle circle);
+    }
 
     public interface EngineEvents {
         void onStart();
@@ -31,6 +40,7 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
         void onKilled();
     }
 
+    private PlayerEvents playerEvents = null;
     private EngineEvents engineEventCallbacks = null;
 
     //Create multiple contructors for the xml inflator (It'll prevent it from crashing)
@@ -52,6 +62,7 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
     public void pseudoConstructor(Context context) {
         gameEngine = new Engine(this);
         this.tickEvents = new ArrayList<>();
+        this.circles = new ArrayList<>();
 
         setFocusable(true);
         setFocusableInTouchMode(true);
@@ -66,6 +77,10 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
         this.engineEventCallbacks = engineEvents;
     }
 
+    public void setPlayerCallbacks(PlayerEvents playerEvents) {
+        this.playerEvents = playerEvents;
+    }
+
     public void addTickEvent(TickEvent event) {
         event.inheritAttributes(this.gameEngine); //Inherit the predefined attributes of the engine
         this.tickEvents.add(event);
@@ -75,17 +90,65 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
         this.backgroundColor = backgroundColor;
     }
 
+    public void setCirclePadding(float padding) {
+        this.padding = padding;
+    }
+
+    public void addCircle(Circle c) {
+        c.setCircleEvents(new Circle.CircleEvents() {
+            @Override
+            public void onClick(Circle circle) {
+                if(playerEvents != null) playerEvents.onClicked(circle);
+            }
+
+            @Override
+            public void onDestroyed(Circle circle) {
+                for(int ind = 0; ind < circles.size(); ind++) {
+                    if(circle.getCircleId() == circles.get(ind).getCircleId()) {
+                        circles.remove(ind); //Remove the current circle from the screen
+                    }
+                }
+                if(playerEvents != null) playerEvents.onDestroyed(circle);
+            }
+        });
+        c.setCircleId(circleId);
+        this.circles.add(c);
+        circleId++;
+    }
+
+    public void addCircles(CircleProps []circles) {
+       for(CircleProps props : circles) {
+            Circle circle = new Circle(this.gameEngine, props.getColor());
+            //Temporarily set the circle its max size so we can compare its distance to the other circles
+            circle.setScaledRadius(props.getRadius);
+            int sR = circle.getRadius();
+
+            for(Circle c : this.circles) {
+                int r = c.getRadius();
+                float minDistanceApart = (this.gameEngine.getWidth() * this.padding) + (float) sR + (float) r; 
+                
+            }
+       }
+    }
+
+    public int getCircleCount() {
+        return this.circles.size();
+    }
+
     @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
         canvas.drawColor(backgroundColor);
-        this.gameEngine.setCurrentView(canvas);
+        // NOT NEEDED - this.gameEngine.setCurrentView(canvas);
         if (this.engineEventCallbacks != null) engineEventCallbacks.onTick(this.gameEngine);
 
         //Increment all of the local tick events to check if an event loop has occured
         for (TickEvent event : this.tickEvents) {
             event.engineTicked(this.gameEngine);
-            event.canvasDrawLoop(this.gameEngine, canvas);
+        }
+
+        for(Circle circle : this.circles) {
+            circle.drawToCanvas(canvas);
         }
     }
 
@@ -97,10 +160,8 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
 
         Logger.Log("GameSurfaceView touched (x: %.2f, y: %.2f)", xTouch, yTouch);
 
-        for(TickEvent event : this.tickEvents) {
-            for(Circle circle : event.getAllCircles()) {
-                circle.emitTouchEvent(xTouch, yTouch);
-            }
+        for(Circle circle : this.circles) {
+            circle.emitTouchEvent(xTouch, yTouch);
         }
         return true;
     }
@@ -111,13 +172,15 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
             @Override
             public void surfaceCreated(SurfaceHolder surfaceHolder) {
                 //Only start the game engine when the surface has been created
-//                if(gameEngine != null && gameEngine.is)
+                if(gameEngine != null && !gameEngine.isRunning()) {
+                    try {
+                        gameEngine.start();
+                        gameEngine.setDims(getWidth(), getHeight());
+                    } catch (Exception ignored){}
+                    
+                    if (engineEventCallbacks != null) engineEventCallbacks.onStart();
+                }
 
-                try {
-                    gameEngine.start();
-                    gameEngine.setDims(getWidth(), getHeight());
-                } catch (Exception ignored){}
-                if (engineEventCallbacks != null) engineEventCallbacks.onStart();
             }
 
             @Override
@@ -138,8 +201,8 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
         if(engineEventCallbacks != null) engineEventCallbacks.onPaused();
     }
 
-    public void continueEngine() {
-        this.gameEngine.continueEngine();
+    public void resumeEngine() {
+        this.gameEngine.resumeEngine();
     }
 
     public void destroyEngine() {

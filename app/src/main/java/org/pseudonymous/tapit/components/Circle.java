@@ -21,13 +21,14 @@ import org.pseudonymous.tapit.engine.Engine;
 
 public class Circle {
     private int x, y, r, c, pW, pH;
+    private long circleId = 0;
     private float sX, sY, sR;
     private ValueAnimator out, in;
     private boolean clickedOn = false;
 
     public interface CircleEvents {
-        void onClick();
-        void onDestroyed();
+        void onClick(Circle circle);
+        void onDestroyed(Circle circle);
     }
 
     private CircleEvents circleEvents;
@@ -44,6 +45,14 @@ public class Circle {
     public void setParentDims(int width, int height) {
         this.pW = width;
         this.pH = height;
+    }
+
+    public void setCircleId(long id) {
+        this.circleId = id;
+    }
+
+    public long getCircleId() {
+        return this.circleId;
     }
 
     public void inheritParentAttributes(Engine engine) {
@@ -73,6 +82,12 @@ public class Circle {
     public void setScaledRadius(float r) {
         this.sR = r;
         this.r = (int) ((float) ((this.pH > this.pW) ? this.pW : this.pH) * (r / 2)); //Make sure we stick to the bounds of our screen
+    }
+
+    public float distanceFrom(Circle otherCircle) {
+        int dX = Math.abs(otherCircle.getXPosition() - this.getXPosition());
+        int dY = Math.abs(otherCircle.getYPosition() - this.getYPosition());
+        return Math.sqrt(Math.pow(dX, 2) + Math.pow(dY, 2));
     }
 
     public int getXPosition() {
@@ -106,9 +121,13 @@ public class Circle {
     public void emitTouchEvent(float xTouch, float yTouch) {
         double distanceFromCenter = Math.sqrt(Math.pow(Math.abs(this.x - xTouch), 2) + Math.pow(Math.abs(this.y - yTouch), 2));
         if((int) distanceFromCenter < this.r && this.circleEvents != null) {
-            this.circleEvents.onClick();
+            this.circleEvents.onClick(this);
             clickedOn = true;
         }
+    }
+
+    public void startAnimation(float maxScaledRadius, int waitDuration) {
+        this.startAnimation(maxScaledRadius, 300, waitDuration, 300);
     }
 
     public void startAnimation(float maxScaledRadius, int outDuration, final int waitDuration, int inDuration) {
@@ -155,11 +174,13 @@ public class Circle {
             }
         });
 
+        final Circle _circle = this;
+
         in.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                if(circleEvents != null && !clickedOn) circleEvents.onDestroyed();
+                if(circleEvents != null && !clickedOn) circleEvents.onDestroyed(_circle);
             }
         });
 

@@ -77,9 +77,9 @@ public class MainActivity extends AppCompatActivity {
     protected void startGame() {
 
         final int[] radius = {1};
-        final TickEvent circleHandler = new TickEvent(10f); //Happens every 500 milliseconds (1/2)
+        final TickEvent circleHandler = new TickEvent(0.33f); //Happens every 500 milliseconds (1/2)
 
-        circleHandler.setDrawLoop(new TickEvent.DrawLoop() {
+        /*circleHandler.setDrawLoop(new TickEvent.DrawLoop() {
             @Override
             public List<Circle> onDrawLoop(Engine engine, List<Circle> circles) {
                 List<Circle> newCircles = new ArrayList<>();
@@ -109,16 +109,30 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return newCircles;
             }
-        });
+        });*/
 
         circleHandler.setAttachedEvent(new TickEvent.AttachedEvent() {
             @Override
             public void onEvent(Engine engine, long elapsedTime) {
+                //game.addCircle(
                 //Logger.Log("SAMPLE EVENT CALLED %d", elapsedTime);
             }
         });
 
         game.addTickEvent(circleHandler);
+
+        game.setPlayerCallbacks(new GameSurfaceView.PlayerEvents() {
+            @Override
+            public void onClicked(Circle circle) {
+
+            }
+
+            @Override
+            public void onDestroyed(Circle circle) {
+
+            }
+        });
+
         game.setGameCallbacks(new GameSurfaceView.EngineEvents() {
             @Override
             public void onStart() {
@@ -145,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    // Not working, we need to revise how we draw circles and such...
+    /*// Not working, we need to revise how we draw circles and such...
     private List<Circle> drawCircle(float x, float y, Engine engine, List<Circle> circles){
         List<Circle> newCircles = new ArrayList<>();
         newCircles.addAll(circles);
@@ -169,6 +183,6 @@ public class MainActivity extends AppCompatActivity {
         newCircles.add(circle);
         circle.startAnimation(0.2f, 200, 1000, 200);
         return newCircles;
-    }
+    }*/
 
 }

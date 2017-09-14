@@ -97,7 +97,7 @@ public class Engine extends Thread {
         this.pause = true;
     }
 
-	public void continueEngine() {
+	public void resumeEngine() {
         this.pause = false;
     }
 
@@ -105,8 +105,9 @@ public class Engine extends Thread {
 		return this.pause;
 	}
 
-	//public void s
-
+	public boolean isRunning() {
+        return this.running;
+    }
 
     public void setCurrentView(Canvas currentView) {
         this.currentView = currentView;
