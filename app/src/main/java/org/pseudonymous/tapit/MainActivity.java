@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
         game = findViewById(R.id.game_view);
         game.setTicksPerSecond(60);
         game.setBackgroundColor(Configs.getColor(R.color.colorPrimaryDark, this));
-        game.setGameMode(GameSurfaceView.GameMode.POLYGON);
+        game.setGameMode(GameSurfaceView.GameMode.RANDOM);
 
         startGame();
     }
@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void startGame() {
-        final TickEvent circleHandler = new TickEvent(0.33f); //Happens every 500 milliseconds (1/2)
+        final TickEvent circleHandler = new TickEvent(0.5f); //Happens every 500 milliseconds (1/2)
 
         circleHandler.setAttachedEvent(new TickEvent.AttachedEvent() {
             @Override
@@ -82,9 +82,9 @@ public class MainActivity extends AppCompatActivity {
                 Logger.Log("Creating the new circles");
 
                 int circleCount = ThreadLocalRandom.current().nextInt(1, 5);
-                float circleSize = 0.6f / circleCount;
-                int waitTime = 600 * circleCount;
-                if(waitTime < 2000) waitTime = 2000;
+                float circleSize = 0.2f; // 0.6f / circleCount;
+                int waitTime = 1600; //600 * circleCount;
+//                if(waitTime < 2000) waitTime = 2000;
 
                 CircleProps prop = new CircleProps(Configs.getColor(R.color.green, MainActivity.this), circleSize, waitTime);
                 CircleProps props[] = new CircleProps[circleCount];

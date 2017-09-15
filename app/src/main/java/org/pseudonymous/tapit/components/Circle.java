@@ -29,6 +29,7 @@ public class Circle {
             clickedOn = false,
             render = true,
             animating = false;
+    private float hitboxScalePercent = 2.2f;
 
     public interface CircleEvents {
         void onClick(Circle circle);
@@ -169,7 +170,7 @@ public class Circle {
     public void emitTouchEvent(float xTouch, float yTouch) {
         if(clickedOn) return; //Skip the touch event if the circle has already been clicked on
         double distanceFromCenter = Math.sqrt(Math.pow(Math.abs(this.x - xTouch), 2) + Math.pow(Math.abs(this.y - yTouch), 2));
-        if((int) distanceFromCenter < this.r && this.circleEvents != null) {
+        if((int) distanceFromCenter < this.r * hitboxScalePercent && this.circleEvents != null) {
             //Start the in animation if it hasn't already been started
             if(!in.isStarted() && !in.isRunning()) {
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -185,7 +186,7 @@ public class Circle {
     }
 
     public void startAnimation(float maxScaledRadius, int waitDuration) {
-        this.startAnimation(maxScaledRadius, 300, waitDuration, 300);
+        this.startAnimation(maxScaledRadius, 200, waitDuration, 200);
     }
 
     public void startAnimation(float maxScaledRadius, int outDuration, final int waitDuration, int inDuration) {

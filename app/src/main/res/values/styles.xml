@@ -29,7 +29,7 @@
     </style>
 
     <style name="CurScore" parent="baseHeader">
-        <item name="android:textSize">70sp</item>
+        <item name="android:textSize">80sp</item>
     </style>
 
     <style name="HighScore" parent="baseHeader">

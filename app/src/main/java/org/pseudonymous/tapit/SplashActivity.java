@@ -28,27 +28,29 @@ public class SplashActivity extends AppCompatActivity {
         splashView.setTicksPerSecond(60);
         splashView.setBackgroundColor(Configs.getColor(R.color.colorPrimaryDark, this));
 
-        splashView.setSplashViewCallbacks(new SplashView.SplashViewCallbacks() {
+        /*splashView.setSplashViewCallbacks(new SplashView.SplashViewCallbacks() {
             @Override
             public void onComplete() {
                 startMainActivity();
             }
-        });
+        });*/
 
-        splashView.startSplash();
+        startMainActivity();
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(300);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                createCircle();
-                createText();
-            }
-        }).start();
+//        splashView.startSplash();
+
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    Thread.sleep(300);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//                createCircle();
+//                createText();
+//            }
+//        }).start();
     }
 
     public void createCircle() {

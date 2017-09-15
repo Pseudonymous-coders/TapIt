@@ -13,57 +13,54 @@
         app:layout_heightPercent="20%"
         android:background="@color/colorPrimaryDark"
         >
-        <ImageButton
-            android:id="@+id/SettingsButton"
-            app:layout_widthPercent="20%"
-            app:layout_heightPercent="50%"
-            android:layout_toRightOf="@+id/CurScoreHeader"
-            android:theme="@style/SettingsCog"
-            android:src="@drawable/cog"
-            />
-        <TextView
-            android:id="@+id/CurScoreHeader"
-            android:text="SCORE"
-            app:layout_widthPercent="40%"
-            app:layout_heightPercent="35%"
-            android:paddingLeft="20dp"
-            android:theme="@style/CurScoreHeader"
-            />
-        <TextView
-            android:id="@+id/HighScoreHeader"
-            android:text="HIGH SCORE"
-            android:gravity="right"
-            app:layout_widthPercent="40%"
-            app:layout_heightPercent="20%"
-            android:paddingRight="10dp"
-            android:theme="@style/HighScoreHeader"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true" />
+        <!--<ImageButton-->
+            <!--android:id="@+id/SettingsButton"-->
+            <!--app:layout_widthPercent="20%"-->
+            <!--app:layout_heightPercent="50%"-->
+            <!--android:layout_toRightOf="@+id/CurScoreHeader"-->
+            <!--android:theme="@style/SettingsCog"-->
+            <!--android:src="@drawable/cog"-->
+            <!--/>-->
+        <!--<TextView-->
+            <!--android:id="@+id/CurScoreHeader"-->
+            <!--android:text="SCORE"-->
+            <!--app:layout_widthPercent="40%"-->
+            <!--app:layout_heightPercent="35%"-->
+            <!--android:paddingLeft="20dp"-->
+            <!--android:theme="@style/CurScoreHeader"-->
+            <!--/>-->
+        <!--<TextView-->
+            <!--android:id="@+id/HighScoreHeader"-->
+            <!--android:text="HIGH SCORE"-->
+            <!--android:gravity="right"-->
+            <!--app:layout_widthPercent="40%"-->
+            <!--app:layout_heightPercent="20%"-->
+            <!--android:paddingRight="10dp"-->
+            <!--android:theme="@style/HighScoreHeader"-->
+            <!--android:layout_alignParentTop="true"-->
+            <!--android:layout_alignParentEnd="true" />-->
 
         <org.pseudonymous.tapit.components.ScoreText
             android:id="@+id/cur_score"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
             android:includeFontPadding="false"
             android:paddingStart="5dp"
             android:text="@string/CurScore"
             android:textAlignment="center"
             android:theme="@style/CurScore"
-            app:layout_heightPercent="65%"
-            app:layout_widthPercent="35%" />
+            app:layout_heightPercent="70%"
+            app:layout_widthPercent="100%" />
 
         <org.pseudonymous.tapit.components.ScoreText
             android:id="@+id/high_score"
-            android:layout_alignParentEnd="true"
-            android:layout_below="@id/HighScoreHeader"
+            android:layout_below="@id/cur_score"
             android:gravity="end"
             android:includeFontPadding="false"
-            android:paddingEnd="10dp"
-            android:paddingStart="0dp"
             android:text="0"
+            android:textAlignment="center"
             android:theme="@style/HighScore"
             app:layout_heightPercent="30%"
-            app:layout_widthPercent="65%" />
+            app:layout_widthPercent="100%" />
     </android.support.percent.PercentRelativeLayout>
 
     <org.pseudonymous.tapit.engine.GameSurfaceView
