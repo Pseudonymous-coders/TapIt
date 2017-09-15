@@ -20,7 +20,9 @@ import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 
 import org.pseudonymous.tapit.components.Circle;
+import org.pseudonymous.tapit.components.ScoreText;
 import org.pseudonymous.tapit.components.StartButton;
+import org.pseudonymous.tapit.configs.CircleProps;
 import org.pseudonymous.tapit.configs.Configs;
 import org.pseudonymous.tapit.configs.Logger;
 import org.pseudonymous.tapit.engine.Engine;
@@ -29,6 +31,7 @@ import org.pseudonymous.tapit.engine.TickEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -36,6 +39,7 @@ import java.util.List;
  */
 public class MainActivity extends AppCompatActivity {
     private StartButton startButton;
+    private ScoreText currentScore, highScore;
     private GameSurfaceView game;
 
     @Override
@@ -60,10 +64,22 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        startButton.setAnimationCallbacks(new StartButton.AnimationCallbacks() {
+            @Override
+            public void onAnimationEnd() {
+                game.resumeEngine();
+            }
+        });
+
+        //Define the current and high score text view
+        currentScore = findViewById(R.id.cur_score);
+        highScore = findViewById(R.id.high_score);
+
         //Load the game surface view
-        game = findViewById(R.id.GameZone);
+        game = findViewById(R.id.game_view);
         game.setTicksPerSecond(60);
         game.setBackgroundColor(Configs.getColor(R.color.colorPrimaryDark, this));
+        game.setGameMode(GameSurfaceView.GameMode.POLYGON);
 
         startGame();
     }
@@ -75,47 +91,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void startGame() {
-
-        final int[] radius = {1};
         final TickEvent circleHandler = new TickEvent(0.33f); //Happens every 500 milliseconds (1/2)
-
-        /*circleHandler.setDrawLoop(new TickEvent.DrawLoop() {
-            @Override
-            public List<Circle> onDrawLoop(Engine engine, List<Circle> circles) {
-                List<Circle> newCircles = new ArrayList<>();
-                newCircles.addAll(circles);
-                if (engine.getElapsedTime() > 4000 && radius[0] == 1) {
-                    Circle toAdd = new Circle(engine, Configs.getColor(R.color.green, MainActivity.this));
-                    toAdd.setCircleEvents(new Circle.CircleEvents() {
-                        @Override
-                        public void onClick() {
-                            Logger.Log("THE CIRCLE WAS CLICKED ON");
-                        }
-
-                        @Override
-                        public void onDestroyed() {
-                            Logger.Log("The player lost!");
-                        }
-                    });
-                    toAdd.setScaledPosition(0.5f, 0.3f);
-                    toAdd.setScaledRadius(0.05f);
-                    newCircles.add(toAdd);
-                    radius[0] = 0;
-                } else if(engine.getElapsedTime() > 4000 && radius[0] == 0) {
-                    for(Circle circle : newCircles) {
-                        circle.startAnimation(0.2f, 200, 1000, 200);
-                    }
-                    radius[0] = 2;
-                }
-                return newCircles;
-            }
-        });*/
 
         circleHandler.setAttachedEvent(new TickEvent.AttachedEvent() {
             @Override
             public void onEvent(Engine engine, long elapsedTime) {
-                //game.addCircle(
-                //Logger.Log("SAMPLE EVENT CALLED %d", elapsedTime);
+                Logger.Log("Creating the new circles");
+
+                int circleCount = ThreadLocalRandom.current().nextInt(1, 5);
+                float circleSize = 0.6f / circleCount;
+                int waitTime = 600 * circleCount;
+                if(waitTime < 2000) waitTime = 2000;
+
+                CircleProps prop = new CircleProps(Configs.getColor(R.color.green, MainActivity.this), circleSize, waitTime);
+                CircleProps props[] = new CircleProps[circleCount];
+                for(int ind = 0; ind < props.length; ind++) {
+                    props[ind] = prop;
+                }
+
+                game.addCircles(props);
+                Logger.Log("Created! %d", game.getCircleCount());
             }
         });
 
@@ -124,12 +119,16 @@ public class MainActivity extends AppCompatActivity {
         game.setPlayerCallbacks(new GameSurfaceView.PlayerEvents() {
             @Override
             public void onClicked(Circle circle) {
+                currentScore.incrementScore(); //Add one to the current score
 
+                if(currentScore.getScore() > highScore.getScore()) {
+                    highScore.setScore(currentScore.getScore());
+                }
             }
 
             @Override
             public void onDestroyed(Circle circle) {
-
+                currentScore.setScore(0);
             }
         });
 
@@ -141,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTick(Engine engine) {
-                //log("TICK");
+                //Logger.Log("TICK");
             }
 
             @Override
@@ -156,6 +155,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         game.startEngine();
+        game.pauseEngine();
     }
 
 

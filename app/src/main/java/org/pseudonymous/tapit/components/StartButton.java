@@ -10,8 +10,12 @@ import android.util.AttributeSet;
 import android.view.animation.LinearInterpolator;
 
 public class StartButton extends android.support.v7.widget.AppCompatButton {
-    public int activityWidth;
-    public int activityHeight;
+    public interface AnimationCallbacks {
+        void onAnimationEnd();
+    }
+
+    private AnimationCallbacks animationCallbacks = null;
+
     public StartButton(Context context) {
         super(context);
     }
@@ -24,15 +28,11 @@ public class StartButton extends android.support.v7.widget.AppCompatButton {
         super(context, attrs, defStyleAttr);
     }
 
-    public void inherit(Activity activity) {
-        Point size = new Point();
-        activity.getWindowManager().getDefaultDisplay().getSize(size);
-        this.activityHeight = size.y;
-        this.activityWidth = size.x;
+    public void setAnimationCallbacks(AnimationCallbacks animationCallbacks) {
+        this.animationCallbacks = animationCallbacks;
     }
 
     public void startAnimation() {
-        final int buttonWidth = this.getWidth();
         final int buttonHeight = this.getHeight();
         final ValueAnimator downAnimator = ValueAnimator.ofFloat(0, buttonHeight);
 
@@ -47,7 +47,7 @@ public class StartButton extends android.support.v7.widget.AppCompatButton {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                // This is where we will start GameEngine
+                if(animationCallbacks != null) animationCallbacks.onAnimationEnd();
             }
         });
 

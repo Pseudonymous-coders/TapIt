@@ -26,7 +26,7 @@
             android:text="SCORE"
             app:layout_widthPercent="40%"
             app:layout_heightPercent="35%"
-            android:paddingLeft="10dp"
+            android:paddingLeft="20dp"
             android:theme="@style/CurScoreHeader"
             />
         <TextView
@@ -39,32 +39,35 @@
             android:theme="@style/HighScoreHeader"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true" />
-        <TextView
-            android:id="@+id/CurScore"
-            android:layout_below="@id/CurScoreHeader"
-            app:layout_widthPercent="60%"
-            app:layout_heightPercent="65%"
+
+        <org.pseudonymous.tapit.components.ScoreText
+            android:id="@+id/cur_score"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
             android:includeFontPadding="false"
             android:paddingStart="5dp"
-            android:theme="@style/CurScore"
             android:text="@string/CurScore"
-            />
-        <TextView
-            android:id="@+id/HighScore"
-            android:layout_toEndOf="@id/CurScore"
+            android:textAlignment="center"
+            android:theme="@style/CurScore"
+            app:layout_heightPercent="65%"
+            app:layout_widthPercent="35%" />
+
+        <org.pseudonymous.tapit.components.ScoreText
+            android:id="@+id/high_score"
+            android:layout_alignParentEnd="true"
             android:layout_below="@id/HighScoreHeader"
-            android:gravity="right"
-            app:layout_widthPercent="40%"
-            app:layout_heightPercent="30%"
-            android:paddingEnd="10dp"
+            android:gravity="end"
             android:includeFontPadding="false"
+            android:paddingEnd="10dp"
+            android:paddingStart="0dp"
+            android:text="0"
             android:theme="@style/HighScore"
-            android:text="@string/HighScore"
-            />
+            app:layout_heightPercent="30%"
+            app:layout_widthPercent="65%" />
     </android.support.percent.PercentRelativeLayout>
 
     <org.pseudonymous.tapit.engine.GameSurfaceView
-        android:id="@+id/GameZone"
+        android:id="@+id/game_view"
         app:layout_heightPercent="100%"
         android:layout_width="match_parent"
         android:layout_below="@id/GameHeader" />

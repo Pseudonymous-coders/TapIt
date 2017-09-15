@@ -7,6 +7,7 @@ public class CircleProps {
     public CircleProps(int c, float r, int w) {
         this.c = c;
         this.r = r;
+        this.w = w;
     }
 
     public void setColor(int c) {

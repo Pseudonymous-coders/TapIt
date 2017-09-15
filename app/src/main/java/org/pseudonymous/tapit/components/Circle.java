@@ -3,16 +3,17 @@ package org.pseudonymous.tapit.components;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.animation.AccelerateInterpolator;
+import android.view.animation.LinearInterpolator;
 
 import org.pseudonymous.tapit.configs.Logger;
 import org.pseudonymous.tapit.engine.Engine;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Created by smerkous on 9/4/17.
@@ -20,15 +21,19 @@ import org.pseudonymous.tapit.engine.Engine;
  */
 
 public class Circle {
-    private int x, y, r, c, pW, pH;
-    private long circleId = 0;
-    private float sX, sY, sR;
+    private int x, y, r, c, pW, pH, mR;
+    private long circleId = 0, startTime = -1, lifeSpan = -1;
+    private float sX, sY, sR, sMR;
     private ValueAnimator out, in;
-    private boolean clickedOn = false;
+    private boolean
+            clickedOn = false,
+            render = true,
+            animating = false;
 
     public interface CircleEvents {
         void onClick(Circle circle);
         void onDestroyed(Circle circle);
+        void onCleanup(Circle circle);
     }
 
     private CircleEvents circleEvents;
@@ -75,13 +80,52 @@ public class Circle {
         this.y = (int) ((float) this.pH * y);
     }
 
+    public float getPaddingWidth(float sidePadding) {
+        return (this.pW * sidePadding) + (float) this.mR;
+    }
+
+    public float getPaddingHeight(float sidePadding) {
+        return (this.pH * sidePadding) + (float) this.mR;
+    }
+
+    public float getAvailableWidth(float paddingWidth) {
+        return (this.pW - (2 * paddingWidth));
+    }
+
+    public float getAvailableHeight(float paddingHeight) {
+        return (this.pH - (2 * paddingHeight));
+    }
+
+    public void setRandomLocation(float sidePadding) {
+        float rX = ThreadLocalRandom.current().nextFloat();
+        float rY = ThreadLocalRandom.current().nextFloat();
+        float paddingWidth = this.getPaddingWidth(sidePadding);
+        float paddingHeight = this.getPaddingHeight(sidePadding);
+        float maxWidth = this.getAvailableWidth(paddingWidth);
+        float maxHeight = this.getAvailableHeight(paddingHeight);
+        this.sX = rX;
+        this.sY = rY;
+        this.x = (int) (maxWidth * rX) + (int) paddingWidth;
+        this.y = (int) (maxHeight * rY) + (int) paddingHeight;
+    }
+
     public void setRadius(int r) {
         this.r = r;
     }
 
     public void setScaledRadius(float r) {
         this.sR = r;
+        if(r == 0.0f) {
+            render = false;
+            return;
+        }
+        render = true;
         this.r = (int) ((float) ((this.pH > this.pW) ? this.pW : this.pH) * (r / 2)); //Make sure we stick to the bounds of our screen
+    }
+
+    public void setMaxScaledRadius(float r) {
+        this.sMR = r;
+        this.mR = (int) ((float) ((this.pH > this.pW) ? this.pW : this.pH) * (r / 2)); //Make sure we stick to the bounds of our screen
     }
 
     public float distanceFrom(Circle otherCircle) {
@@ -102,6 +146,10 @@ public class Circle {
         return this.r;
     }
 
+    public int getMaxRadius() {
+        return this.mR;
+    }
+
     public float getScaledXPosition() {
         return this.sX;
     }
@@ -119,8 +167,18 @@ public class Circle {
     }
 
     public void emitTouchEvent(float xTouch, float yTouch) {
+        if(clickedOn) return; //Skip the touch event if the circle has already been clicked on
         double distanceFromCenter = Math.sqrt(Math.pow(Math.abs(this.x - xTouch), 2) + Math.pow(Math.abs(this.y - yTouch), 2));
         if((int) distanceFromCenter < this.r && this.circleEvents != null) {
+            //Start the in animation if it hasn't already been started
+            if(!in.isStarted() && !in.isRunning()) {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        in.start();
+                    }
+                });
+            }
             this.circleEvents.onClick(this);
             clickedOn = true;
         }
@@ -131,6 +189,8 @@ public class Circle {
     }
 
     public void startAnimation(float maxScaledRadius, int outDuration, final int waitDuration, int inDuration) {
+        startTime = System.currentTimeMillis();
+        lifeSpan = outDuration + waitDuration + inDuration + 200;
         out = ValueAnimator.ofFloat(this.getScaledRadius(), maxScaledRadius);
         in = ValueAnimator.ofFloat(maxScaledRadius, 0);
 
@@ -143,11 +203,11 @@ public class Circle {
         };
 
         out.addUpdateListener(updateListener);
-        out.setInterpolator(new AccelerateInterpolator());
+        out.setInterpolator(new LinearInterpolator()); //new AccelerateInterpolator());
         out.setDuration(outDuration);
 
         in.addUpdateListener(updateListener);
-        in.setInterpolator(new AccelerateInterpolator());
+        in.setInterpolator(new LinearInterpolator()); //new AccelerateInterpolator());
         in.setDuration(inDuration);
 
         out.addListener(new AnimatorListenerAdapter() {
@@ -159,12 +219,14 @@ public class Circle {
                     public void run() {
                         try {
                             Thread.sleep(waitDuration);
-                            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    in.start();
-                                }
-                            });
+                            if(!in.isStarted() && !in.isRunning() && !clickedOn) {
+                                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        in.start();
+                                    }
+                                });
+                            }
                         } catch (InterruptedException ignored) {}
                     }
                 });
@@ -180,20 +242,32 @@ public class Circle {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
+                animating = false;
                 if(circleEvents != null && !clickedOn) circleEvents.onDestroyed(_circle);
+                else if(circleEvents != null) circleEvents.onCleanup(_circle);
             }
         });
 
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
-                Logger.Log("STARTING THE ANIMATION");
+                animating = true;
                 out.start();
             }
         });
     }
 
+    public boolean isAnimating() {
+        return this.animating;
+    }
+
+    public boolean isDead() {
+        if(startTime == -1 || lifeSpan == -1) return false;
+        return (System.currentTimeMillis() - startTime) <= lifeSpan;
+    }
+
     public void drawToCanvas(Canvas canvas) {
+        if(!render) return; //Don't render the circle if the radius is zero
         Paint p = new Paint();
         p.setStyle(Paint.Style.FILL);
         p.setColor(this.c);

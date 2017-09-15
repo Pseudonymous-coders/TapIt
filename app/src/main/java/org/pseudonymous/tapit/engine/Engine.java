@@ -6,12 +6,13 @@ import android.graphics.Color;
 import org.pseudonymous.tapit.configs.Logger;
 
 /**
+ *
  * Created by smerkous on 9/3/17.
  */
 
 public class Engine extends Thread {
     private int ticksPerSecond = 30, width = 100, height = 100;
-    private boolean running = true, pause = false;
+    private boolean running = false, paused = false;
     private Canvas currentView;
     private GameSurfaceView view;
     private long startTime;
@@ -55,7 +56,7 @@ public class Engine extends Thread {
 
         while (running) {
             Canvas c = null;
-            if (this.pause) {
+            if (this.paused) {
                 try {
                     Thread.sleep(100); //Wait for the engine to unpause before we continue to render our next elements
                 } catch (InterruptedException ignored) {
@@ -94,15 +95,15 @@ public class Engine extends Thread {
     }
 
     public void pauseEngine() {
-        this.pause = true;
+        this.paused = true;
     }
 
 	public void resumeEngine() {
-        this.pause = false;
+        this.paused = false;
     }
 
 	public boolean isPaused() {
-		return this.pause;
+		return this.paused;
 	}
 
 	public boolean isRunning() {
@@ -121,8 +122,13 @@ public class Engine extends Thread {
         return this.currentView;
     }
 
+    public void startEngine() {
+        this.running = true;
+        this.start();
+    }
+
     //Kill the game engine
-    public void kill() {
+    public void killEngine() {
         this.running = false;
         this.view = null;
         boolean retry = true;
@@ -137,8 +143,5 @@ public class Engine extends Thread {
         }
 
         Logger.LogWarning("Killing the engine (Reason: The kill method was called)");
-    }
-
-    public void killEngine() {
     }
 }
