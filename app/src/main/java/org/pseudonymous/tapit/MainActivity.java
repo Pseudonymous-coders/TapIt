@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startButton.startAnimation();
+                startButton.downAnimation();
             }
         });
 
@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
         game = findViewById(R.id.game_view);
         game.setTicksPerSecond(60);
         game.setBackgroundColor(Configs.getColor(R.color.colorPrimaryDark, this));
-        game.setGameMode(GameSurfaceView.GameMode.RANDOM);
+        game.setGameMode(GameSurfaceView.GameMode.POLYGON);
 
         startGame();
     }
@@ -74,16 +74,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void startGame() {
-        final TickEvent circleHandler = new TickEvent(0.5f); //Happens every 500 milliseconds (1/2)
+        final float[] tickerSpeed= {0.5f};
+        final TickEvent circleHandler = new TickEvent(tickerSpeed[0]); //Happens every 500 milliseconds (1/2)
 
         circleHandler.setAttachedEvent(new TickEvent.AttachedEvent() {
             @Override
             public void onEvent(Engine engine, long elapsedTime) {
                 Logger.Log("Creating the new circles");
+                if (tickerSpeed[0] < 2f) tickerSpeed[0] += 0.05f;
+
+                circleHandler.setEventsPerSecond(tickerSpeed[0]);
 
                 int circleCount = ThreadLocalRandom.current().nextInt(1, 5);
                 float circleSize = 0.2f; // 0.6f / circleCount;
-                int waitTime = 1600; //600 * circleCount;
+                int waitTime = 800; //600 * circleCount;
 //                if(waitTime < 2000) waitTime = 2000;
 
                 CircleProps prop = new CircleProps(Configs.getColor(R.color.green, MainActivity.this), circleSize, waitTime);
@@ -112,6 +116,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDestroyed(Circle circle) {
                 currentScore.setScore(0);
+                tickerSpeed[0] = 0.5f;
+                game.pauseEngine();
+                game.clearAllCircles();
+                startButton.upAnimation();
+
             }
         });
 

@@ -32,9 +32,32 @@ public class StartButton extends android.support.v7.widget.AppCompatButton {
         this.animationCallbacks = animationCallbacks;
     }
 
-    public void startAnimation() {
+    public void downAnimation() {
         final int buttonHeight = this.getHeight();
         final ValueAnimator downAnimator = ValueAnimator.ofFloat(0, buttonHeight);
+
+        downAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                float value = (float) valueAnimator.getAnimatedValue();
+                setTranslationY(value);
+            }
+        });
+        downAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                if(animationCallbacks != null) animationCallbacks.onAnimationEnd();
+            }
+        });
+
+        downAnimator.start();
+        downAnimator.setInterpolator(new LinearInterpolator());
+    }
+
+    public void upAnimation(){
+        final int buttonHeight = this.getHeight();
+        final ValueAnimator downAnimator = ValueAnimator.ofFloat(buttonHeight, 0);
 
         downAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override

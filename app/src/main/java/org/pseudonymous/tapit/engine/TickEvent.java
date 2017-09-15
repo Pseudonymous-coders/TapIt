@@ -17,6 +17,7 @@ public class TickEvent {
     private float eventsPerSecond = 0;
     private int onTickCallEvent = 0;
     private int currentTick = 0;
+    private int engineTicks = 0;
     private long lastTime = 0;
     private List<Circle> circles;
 
@@ -39,10 +40,12 @@ public class TickEvent {
 
     public void setEventsPerSecond(float perSecond) {
         this.eventsPerSecond = perSecond;
+        this.onTickCallEvent = (int) (((float) this.engineTicks / eventsPerSecond));
     }
 
     void inheritAttributes(Engine engine) {
-        this.onTickCallEvent = (int) (((float) engine.getTicksPerSecond()) / eventsPerSecond);
+        this.engineTicks = engine.getTicksPerSecond();
+        this.onTickCallEvent = (int) (((float) this.engineTicks / eventsPerSecond));
     }
 
     public void setAttachedEvent(AttachedEvent attachedEvent) {
