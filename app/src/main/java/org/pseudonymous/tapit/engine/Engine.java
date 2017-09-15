@@ -2,6 +2,8 @@ package org.pseudonymous.tapit.engine;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.util.Log;
+import android.view.SurfaceView;
 
 import org.pseudonymous.tapit.configs.Logger;
 
@@ -14,10 +16,10 @@ public class Engine extends Thread {
     private int ticksPerSecond = 30, width = 100, height = 100;
     private boolean running = false, paused = false;
     private Canvas currentView;
-    private GameSurfaceView view;
+    private SurfaceView view;
     private long startTime;
 
-    public Engine(GameSurfaceView view) {
+    public Engine(SurfaceView view) {
         this.view = view;
     }
 
@@ -77,7 +79,11 @@ public class Engine extends Thread {
                 break; //Close the thread since the app has been closed
             } finally {
                 if (c != null) {
-                    view.getHolder().unlockCanvasAndPost(c); //Even when there's an error we should unlock the canvas object
+                    try {
+                        view.getHolder().unlockCanvasAndPost(c); //Even when there's an error we should unlock the canvas object
+                    } catch (Throwable ignored) {
+                        Logger.LogError("Failed to unlock canvas from holder!");
+                    }
                 }
             }
 

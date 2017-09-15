@@ -1,23 +1,8 @@
 package org.pseudonymous.tapit;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
-import android.view.MotionEvent;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
-import android.view.animation.LinearInterpolator;
-import android.widget.Button;
 
 import org.pseudonymous.tapit.components.Circle;
 import org.pseudonymous.tapit.components.ScoreText;
@@ -29,8 +14,6 @@ import org.pseudonymous.tapit.engine.Engine;
 import org.pseudonymous.tapit.engine.GameSurfaceView;
 import org.pseudonymous.tapit.engine.TickEvent;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
