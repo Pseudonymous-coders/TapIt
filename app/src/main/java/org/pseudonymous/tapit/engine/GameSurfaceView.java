@@ -32,7 +32,7 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
     private boolean paused = false;
 
     public enum GameMode {
-        RANDOM, TRIANGLE, SQUARE, POLYGON
+        RANDOM, TRIANGLE, SQUARE, POLYGON, POLYGON_STATIC
     }
 
     public interface PlayerEvents {
@@ -160,6 +160,8 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
             case POLYGON:
                 positionEngine.setSides(circles.length);
                 break;
+            case POLYGON_STATIC:
+                positionEngine.setSidesStatic(circles.length);
         }
 
         positionEngine.rebasePoints();
