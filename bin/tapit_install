@@ -4,7 +4,7 @@ echo "Installing TapIt to the device"
 
 FILE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PKG_NAME="org.pseudonymous.tapit"
-ACTIVITY_NAME="$PKG_NAME.MainActivity"
+ACTIVITY_NAME="$PKG_NAME.SplashActivity"
 APK_PATH="$FILE_DIR/../app/build/outputs/apk/debug/app-debug.apk"
 echo "$APK_PATH"
 
