@@ -2,7 +2,13 @@ package org.pseudonymous.tapit.configs;
 
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
+import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -11,8 +17,24 @@ import org.pseudonymous.tapit.R;
 
 public class Configs {
     @SuppressWarnings("deprecation")
-    public static int getColor(int id, Activity activity){
-        return activity.getResources().getColor(id);
+    public static int getColor(int id, Context context){
+        return context.getResources().getColor(id);
+    }
+
+    @SuppressWarnings("deprecation")
+    public static Bitmap getBitmap(int id, Context context) {
+        try {
+            Drawable drawable = context.getDrawable(id);
+            Canvas canvas = new Canvas();
+            Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+            canvas.setBitmap(bitmap);
+            drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+            drawable.draw(canvas);
+            return bitmap;
+        } catch (NullPointerException err) {
+            Logger.LogError("Failed rendering drawable into a bitmap, attempting to load it through a Bitmap Factory!");
+            return BitmapFactory.decodeResource(context.getResources(), id);
+        }
     }
 
     public static void setPreliminaryScreenFlags(Activity activity) {
@@ -29,6 +51,7 @@ public class Configs {
                         | View.SYSTEM_UI_FLAG_FULLSCREEN
                         | View.SYSTEM_UI_FLAG_IMMERSIVE
                         | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
         );
     }
 

@@ -1,12 +1,18 @@
 package org.pseudonymous.tapit;
 
+import android.graphics.Color;
+import android.graphics.PointF;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 
 import org.pseudonymous.tapit.components.Circle;
+import org.pseudonymous.tapit.components.DraggableImageButton;
 import org.pseudonymous.tapit.components.ScoreText;
 import org.pseudonymous.tapit.components.StartButton;
+import org.pseudonymous.tapit.components.TimeBar;
 import org.pseudonymous.tapit.configs.CircleProps;
 import org.pseudonymous.tapit.configs.Configs;
 import org.pseudonymous.tapit.configs.Logger;
@@ -23,7 +29,13 @@ import java.util.concurrent.ThreadLocalRandom;
 public class MainActivity extends AppCompatActivity {
     private StartButton startButton;
     private ScoreText currentScore, highScore;
+    private TimeBar timeBar;
     private GameSurfaceView game;
+    private ViewGroup menuPanel;
+    private DraggableImageButton menuButton;
+    private boolean playingWhileMenuPullDown = false, isMenuShown = false;
+    private float tickerSpeed= 0.5f;
+    private int windowWidth, windowHeight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,8 +50,13 @@ public class MainActivity extends AppCompatActivity {
         Configs.setFullScreen(this);
         Configs.lockRotation(this);
 
+        //Load the menu panel, and make it invisible
+        menuPanel = findViewById(R.id.menu_panel);
+        menuPanel.setVisibility(View.INVISIBLE);
+
         //Define the start button and its click operation
         startButton = findViewById(R.id.start_button);
+        startButton.setBackgroundColor(Configs.getColor(R.color.green, this));
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -50,13 +67,106 @@ public class MainActivity extends AppCompatActivity {
         startButton.setAnimationCallbacks(new StartButton.AnimationCallbacks() {
             @Override
             public void onAnimationEnd() {
-                game.resumeEngine();
+                if(!isMenuShown) game.resumeEngine();
             }
         });
 
         //Define the current and high score text view
         currentScore = findViewById(R.id.cur_score);
         highScore = findViewById(R.id.high_score);
+
+        //Get the custom top progress bar
+        timeBar = findViewById(R.id.time_bar);
+
+        //Get the menu pull down icon
+        menuButton = findViewById(R.id.menu_button);
+        menuButton.setMinAutoPullDown(0.25f); //The arrow must pass 25% of the screen for the window to pull down
+        menuButton.setBottomLocation(0.93f); //What percent of the screen should the bottom menu arrow be at
+        menuButton.setTints(Configs.getColor(R.color.green, this), Configs.getColor(R.color.colorPrimaryDark, this));
+        menuButton.setButtonImage(Configs.getBitmap(R.drawable.more, this));
+        menuButton.setPullDownEvents(new DraggableImageButton.PullDownEvents() {
+            @Override
+            public void returned(boolean downDirection) {
+                if(downDirection) {
+                    menuPanel.setVisibility(View.INVISIBLE);
+                    menuPanel.setTranslationY(0);
+                    Logger.Log("Hiding menu panel");
+
+                    if (playingWhileMenuPullDown) {
+                        Logger.Log("The player was recently playing... resuming the engine");
+                        game.resumeEngine();
+                    }
+                    isMenuShown = false;
+                } else {
+                    startButton.setVisibility(View.INVISIBLE);
+                    game.setVisibility(View.INVISIBLE);
+                    isMenuShown = true;
+                }
+            }
+
+            @Override
+            public int started(boolean downDirection) {
+                if(downDirection) {
+                    windowWidth = getWidth();
+                    windowHeight = getHeight();
+
+                    menuPanel.setVisibility(View.VISIBLE);
+                    menuPanel.setTranslationY(-windowHeight);
+                    menuPanel.requestFocus();
+
+                    ViewGroup.LayoutParams params = menuPanel.getLayoutParams();
+                    params.width = windowWidth;
+                    params.height = windowHeight;
+                    menuPanel.setLayoutParams(params);
+                    Logger.Log("Showing the menu panel");
+
+                    playingWhileMenuPullDown = !game.isPaused();
+                    if (playingWhileMenuPullDown) {
+                        game.pauseEngine();
+                    }
+                } else {
+                    startButton.setVisibility(View.VISIBLE);
+                    game.setVisibility(View.VISIBLE);
+                    //game.startEngine();
+                }
+
+                return windowHeight;
+            }
+
+            @Override
+            public void moved(float displacement, boolean downDirection) {
+                float buttonDisplacement = (startButton.getTop() - (windowHeight * 0.125f));
+                menuPanel.setTranslationY(displacement - windowHeight);
+
+                //Move the start button with the menu pulldown
+                if(downDirection) {
+                    if (menuButton.getY() > buttonDisplacement) {
+                        startButton.setTranslationY(displacement - buttonDisplacement);
+                    }
+                } else {
+                    if (displacement - buttonDisplacement >= 0) {
+                        startButton.setTranslationY(displacement - buttonDisplacement);
+                    }
+                }
+            }
+
+            @Override
+            public void opened(boolean downDirection) {
+                if(downDirection) {
+                    startButton.setVisibility(View.INVISIBLE);
+                    game.setVisibility(View.INVISIBLE);
+                    Logger.Log("The menu panel is open!");
+                    isMenuShown = true;
+                } else {
+                    Logger.Log("The menu panel is closed!");
+                    if (playingWhileMenuPullDown) {
+                        Logger.Log("The player was recently playing... resuming the engine");
+                        game.resumeEngine();
+                    }
+                    isMenuShown = false;
+                }
+            }
+        });
 
         //Load the game surface view
         game = findViewById(R.id.game_view);
@@ -67,23 +177,49 @@ public class MainActivity extends AppCompatActivity {
         startGame();
     }
 
+    private int getWidth() {
+        return this.getWindow().getDecorView().getWidth();
+    }
+
+    private int getHeight() {
+        return this.getWindow().getDecorView().getHeight();
+    }
+
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
+    }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Logger.Log("Pausing the game engine!");
+        game.pauseEngine();
+        if(game.exists()) {
+            game.cleanUpSurface();
+        }
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Logger.Log("Restarting the game engine");
+        game.resumeEngine();
+        if(!game.exists()) {
+            game.startEngine();
+        }
     }
 
     protected void startGame() {
-        final float[] tickerSpeed= {0.5f};
-        final TickEvent circleHandler = new TickEvent(tickerSpeed[0]); //Happens every 500 milliseconds (1/2)
+        final TickEvent circleHandler = new TickEvent(tickerSpeed); //Happens every 500 milliseconds (1/2)
 
         circleHandler.setAttachedEvent(new TickEvent.AttachedEvent() {
             @Override
             public void onEvent(Engine engine, long elapsedTime) {
                 Logger.Log("Creating the new circles");
-                if (tickerSpeed[0] < 2f) tickerSpeed[0] += 0.05f;
+                if (tickerSpeed < 2f) tickerSpeed += 0.05f;
 
-                circleHandler.setEventsPerSecond(tickerSpeed[0]);
+                circleHandler.setEventsPerSecond(tickerSpeed);
 
                 int circleCount = ThreadLocalRandom.current().nextInt(1, 5);
                 float circleSize = 0.2f; // 0.6f / circleCount;
@@ -97,12 +233,14 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 game.addCircles(props);
+                timeBar.startAnimation((int) (1000.0f / tickerSpeed));
                 Logger.Log("Created! %d", game.getCircleCount());
             }
         });
 
+        //Pause the engine before starting it because we don't want the user to see random circles to appear
+        game.pauseEngine();
         game.addTickEvent(circleHandler);
-
         game.setPlayerCallbacks(new GameSurfaceView.PlayerEvents() {
             @Override
             public void onClicked(Circle circle) {
@@ -115,12 +253,12 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onDestroyed(Circle circle) {
-                currentScore.setScore(0);
-                tickerSpeed[0] = 0.5f;
-                game.pauseEngine();
-                game.clearAllCircles();
-                startButton.upAnimation();
+                endGame();
+            }
 
+            @Override
+            public void onBackgroundTouch(PointF position) {
+                endGame();
             }
         });
 
@@ -147,7 +285,14 @@ public class MainActivity extends AppCompatActivity {
         });
 
         game.startEngine();
+    }
+
+    public void endGame() {
+        currentScore.setScore(0);
+        tickerSpeed = 0.5f;
         game.pauseEngine();
+        game.clearAllCircles();
+        startButton.upAnimation();
     }
 
 

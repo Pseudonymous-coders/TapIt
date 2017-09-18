@@ -25,6 +25,7 @@ public class Circle {
     private long circleId = 0, startTime = -1, lifeSpan = -1;
     private float sX, sY, sR, sMR;
     private ValueAnimator out, in;
+    private Paint circlePaint;
     private boolean
             clickedOn = false,
             render = true,
@@ -41,11 +42,19 @@ public class Circle {
 
     public Circle(int c) {
         this.c = c;
+        init();
     }
 
     public Circle(Engine engine, int c) {
         this.inheritParentAttributes(engine);
         this.c = c;
+        init();
+    }
+
+    private void init() {
+        this.circlePaint = new Paint();
+        this.circlePaint.setStyle(Paint.Style.FILL);
+        this.circlePaint.setColor(this.c);
     }
 
     public void setParentDims(int width, int height) {
@@ -165,12 +174,13 @@ public class Circle {
 
     public void setColor(int c) {
         this.c = c;
+        this.circlePaint.setColor(this.c);
     }
 
-    public void emitTouchEvent(float xTouch, float yTouch) {
-        if(clickedOn) return; //Skip the touch event if the circle has already been clicked on
+    public boolean emitTouchEvent(float xTouch, float yTouch) {
         double distanceFromCenter = Math.sqrt(Math.pow(Math.abs(this.x - xTouch), 2) + Math.pow(Math.abs(this.y - yTouch), 2));
         if((int) distanceFromCenter < this.r * hitboxScalePercent && this.circleEvents != null) {
+            if(clickedOn) return true; //Skip the touch event if the circle has already been clicked on
             //Start the in animation if it hasn't already been started
             if(!in.isStarted() && !in.isRunning()) {
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -182,7 +192,9 @@ public class Circle {
             }
             this.circleEvents.onClick(this);
             clickedOn = true;
+            return true;
         }
+        return false;
     }
 
     public void startAnimation(float maxScaledRadius, int waitDuration) {
@@ -269,9 +281,6 @@ public class Circle {
 
     public void drawToCanvas(Canvas canvas) {
         if(!render) return; //Don't render the circle if the radius is zero
-        Paint p = new Paint();
-        p.setStyle(Paint.Style.FILL);
-        p.setColor(this.c);
-        canvas.drawCircle(this.x, this.y, this.r, p);
+        canvas.drawCircle(this.x, this.y, this.r, this.circlePaint);
     }
 }

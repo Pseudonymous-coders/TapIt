@@ -9,4 +9,11 @@
         <attr name="metaButtonBarButtonStyle" format="reference" />
     </declare-styleable>
 
+    <declare-styleable name="TimeBar">
+        <attr name="bar_color" format="color" />
+        <attr name="slide_to" format="enum">
+            <enum name="left" value="0"/>
+            <enum name="right" value="1"/>
+        </attr>
+    </declare-styleable>
 </resources>

@@ -1,35 +1,37 @@
 package org.pseudonymous.tapit.engine;
 
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.util.Log;
 import android.view.SurfaceView;
 
 import org.pseudonymous.tapit.configs.Logger;
+
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  *
  * Created by smerkous on 9/3/17.
  */
 
-public class Engine extends Thread {
-    private int ticksPerSecond = 30, width = 100, height = 100;
+public class EventEngine extends Thread {
+    private int ticksPerSecond = 30;
     private boolean running = false, paused = false;
-    private Canvas currentView;
-    private SurfaceView view;
     private long startTime;
+    private Engine gameEngine;
+    private List<TickEvent> tickEvents = new CopyOnWriteArrayList<>();
 
-    public Engine(SurfaceView view) {
-        this.view = view;
+    public void setTickEvents(List<TickEvent> tickEvents) {
+        this.tickEvents = tickEvents;
     }
 
-    /**
-     * Sets the amount of times the engine will tick in one second (The faster the smoother)
-     * <p>
-     * Note: This method must be called before any TickEvent is attached or the timing will be off
-     *
-     * @param ticks The amount of ticks there should be per second (similar to FPS)
-     */
+    public void addTickEvent(TickEvent tickEvent) {
+        this.tickEvents.add(tickEvent);
+    }
+
+    public void setCurrentEngine(Engine gameEngine) {
+        this.gameEngine = gameEngine;
+    }
+
     public void setTicksPerSecond(int ticks) {
         this.ticksPerSecond = ticks;
     }
@@ -38,17 +40,12 @@ public class Engine extends Thread {
         return this.ticksPerSecond;
     }
 
-    public void setDims(int width, int height) {
-        this.width = width;
-        this.height = height;
+    public List<TickEvent> getTickEvents() {
+        return this.tickEvents;
     }
 
-    public int getWidth() {
-        return this.width;
-    }
-
-    public int getHeight() {
-        return this.height;
+    public Engine getCurrentEngine() {
+        return this.gameEngine;
     }
 
     @Override
@@ -57,36 +54,28 @@ public class Engine extends Thread {
         this.startTime = System.currentTimeMillis();
 
         while (running) {
-            Canvas c = null;
             if (this.paused) {
                 try {
                     Thread.sleep(100); //Wait for the engine to unpause before we continue to render our next elements
                 } catch (InterruptedException ignored) {
-                    Logger.LogWarning("Killing the engine (Reason: The thread was interrupted)");
+                    Logger.LogWarning("Killing the event engine (Reason: The thread was interrupted)");
                     this.running = false;
                     break;
                 }
+                continue;
             }
             //Time the view callback difference (This should stay well under 10 millis)
             startTime = System.currentTimeMillis();
 
             try {
-                c = view.getHolder().lockCanvas();
-                synchronized (view.getHolder()) { //Make sure no other thread is locked onto the canvas object
-                    view.draw(c);
+                //Increment all of the local tick events to check if an event loop has occured
+                for (TickEvent event : this.tickEvents) {
+                    event.engineTicked(this.gameEngine);
                 }
-            } catch (NullPointerException appClosed) {
-                Logger.LogWarning("Killing the engine (Reason: The Canvas was destroyed)");
-                this.running = false;
-                break; //Close the thread since the app has been closed
-            } finally {
-                if (c != null) {
-                    try {
-                        view.getHolder().unlockCanvasAndPost(c); //Even when there's an error we should unlock the canvas object
-                    } catch (Throwable ignored) {
-                        Logger.LogError("Failed to unlock canvas from holder!");
-                    }
-                }
+            } catch(Throwable err) {
+                Logger.LogError("The event engine failed to run a tick (All errors were'nt handled)");
+                err.printStackTrace();
+                break;
             }
 
             //Sleep the remainder of the time so that the game doesn't run too fast
@@ -118,16 +107,8 @@ public class Engine extends Thread {
         return this.running;
     }
 
-    public void setCurrentView(Canvas currentView) {
-        this.currentView = currentView;
-    }
-
     public long getElapsedTime() {
         return System.currentTimeMillis() - this.startTime;
-    }
-
-    public Canvas getCurrentView() {
-        return this.currentView;
     }
 
     public void startEngine() {
@@ -138,7 +119,6 @@ public class Engine extends Thread {
     //Kill the game engine
     public void killEngine() {
         this.running = false;
-        this.view = null;
         boolean retry = true;
 
         //Lock back onto the main thread before continuing onto the next method
@@ -150,6 +130,6 @@ public class Engine extends Thread {
             }
         }
 
-        Logger.LogWarning("Killing the engine (Reason: The kill method was called)");
+        Logger.LogWarning("Killing the event engine (Reason: The kill method was called)");
     }
 }

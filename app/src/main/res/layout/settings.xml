@@ -1,18 +1,40 @@
-<android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<android.support.percent.PercentRelativeLayout
+    android:id="@+id/menu_panel"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/settings"
-    android:screenOrientation="portrait">
+    android:screenOrientation="portrait"
+    android:background="@color/green"
+    android:visibility="invisible">
 
+    <!--
     <Button
         android:id="@+id/restartButton"
         android:layout_width="match_parent"
         app:layout_heightPercent="20%"
         android:theme="@style/restartButton"
         android:text="Restart"
-    />
+    />-->
 
+    <org.pseudonymous.tapit.components.TimeBar
+        android:id="@+id/time_bar2"
+        android:layout_alignParentTop="true"
+        android:layout_height="200dp"
+        app:layout_widthPercent="100%"
+        app:bar_color="@color/grey"
+        app:slide_to="right"
+        />
+
+    <TextView
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_below="@+id/time_bar2"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:text="YAAY A MENU"
+        android:textAlignment="center"
+        android:textColor="@color/grey"
+        android:textSize="24sp" />
 
 </android.support.percent.PercentRelativeLayout>

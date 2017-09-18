@@ -3,7 +3,10 @@ package org.pseudonymous.tapit.engine;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Point;
+import android.graphics.PointF;
+import android.graphics.SurfaceTexture;
 import android.util.AttributeSet;
+import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -22,14 +25,15 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 
 public class GameSurfaceView extends SurfaceView implements View.OnTouchListener {
-    private SurfaceHolder holder;
-    private Engine gameEngine;
+    private volatile SurfaceHolder holder;
+    private volatile Engine gameEngine;
+    private volatile EventEngine eventEngine;
     private final List<TickEvent> tickEvents = new CopyOnWriteArrayList<>();
     private final List<Circle> circles = new CopyOnWriteArrayList<>();
-    private int backgroundColor;
-    private long circleId = 0;
-    private float padding = 0.09f;
-    private boolean paused = false;
+    private volatile int backgroundColor;
+    private volatile long circleId = 0;
+    private volatile float padding = 0.09f;
+    private volatile boolean paused = false, exists = false;
 
     public enum GameMode {
         RANDOM, TRIANGLE, SQUARE, POLYGON, POLYGON_STATIC
@@ -38,6 +42,7 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
     public interface PlayerEvents {
         void onClicked(Circle circle);
         void onDestroyed(Circle circle);
+        void onBackgroundTouch(PointF position);
     }
 
     public interface EngineEvents {
@@ -69,6 +74,7 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
 
     public void pseudoConstructor(Context context) {
         gameEngine = new Engine(this);
+        eventEngine = new EventEngine();
 
         setFocusable(true);
         setFocusableInTouchMode(true);
@@ -77,6 +83,7 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
 
     public void setTicksPerSecond(int ticksPerSecond) {
         this.gameEngine.setTicksPerSecond(ticksPerSecond);
+        this.eventEngine.setTicksPerSecond(ticksPerSecond);
     }
 
     public void setGameCallbacks(EngineEvents engineEvents) {
@@ -91,6 +98,7 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
         event.inheritAttributes(this.gameEngine); //Inherit the predefined attributes of the engine
         synchronized (this.tickEvents) {
             this.tickEvents.add(event);
+            this.eventEngine.addTickEvent(event);
         }
     }
 
@@ -244,12 +252,8 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
         // NOT NEEDED - this.gameEngine.setCurrentView(canvas);
         if (this.engineEventCallbacks != null) engineEventCallbacks.onTick(this.gameEngine);
 
-        //Increment all of the local tick events to check if an event loop has occured
-        synchronized (this.tickEvents) {
-            for (TickEvent event : this.tickEvents) {
-                event.engineTicked(this.gameEngine);
-            }
-        }
+        //Update the usable game engine to the event engine
+        this.eventEngine.setCurrentEngine(gameEngine);
 
         synchronized (this.circles) {
             for (Circle circle : this.circles) {
@@ -260,30 +264,102 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
 
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
-        if(motionEvent.getAction() != MotionEvent.ACTION_DOWN) return true;
-        float xTouch = motionEvent.getX(0);
-        float yTouch = motionEvent.getY(0);
+        if(this.paused) return true;
+        int pIndex = motionEvent.getActionIndex();
+        int pId = motionEvent.getPointerId(pIndex);
+        int mAction = motionEvent.getActionMasked();
+        switch(mAction) {
+            case MotionEvent.ACTION_DOWN:
+            case MotionEvent.ACTION_POINTER_DOWN: {
+                float xTouch = motionEvent.getX(pIndex);
+                float yTouch = motionEvent.getY(pIndex);
+                Logger.Log("GameSurfaceView touched (x: %.2f, y: %.2f)", xTouch, yTouch);
+                synchronized (this.circles) {
+                    boolean touched = false;
+                    for (Circle circle : this.circles) {
+                        if(circle.emitTouchEvent(xTouch, yTouch)) touched = true;
+                    }
 
-        Logger.Log("GameSurfaceView touched (x: %.2f, y: %.2f)", xTouch, yTouch);
+                    if(!touched) {
+                        Logger.Log("The player missed all of the cirlces");
+                        PointF pF = new PointF();
+                        pF.x = xTouch;
+                        pF.y = yTouch;
+                        if(this.playerEvents != null) this.playerEvents.onBackgroundTouch(pF);
+                    }
+                }
+                break;
+            }
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_POINTER_UP:
+            case MotionEvent.ACTION_CANCEL:
+                Logger.Log("%d pointer removed from canvas!", pId);
+                break;
+        }
 
-        synchronized (this.circles) {
-            for (Circle circle : this.circles) {
-                circle.emitTouchEvent(xTouch, yTouch);
+        /*
+
+        int action = motionEvent.getActionMasked();
+
+        //Check to make sure we are only handling the down press pointer events
+        if(action != MotionEvent.ACTION_DOWN && action != MotionEvent.ACTION_POINTER_DOWN) return true;
+
+        //Handle multi touch events
+        Logger.Log("Pointer count %d", motionEvent.getPointerCount());
+        for(int ind = 0; ind < motionEvent.getPointerCount(); ind++) {
+            float xTouch = motionEvent.getX(ind);
+            float yTouch = motionEvent.getY(ind);
+
+            Logger.Log("GameSurfaceView touched (x: %.2f, y: %.2f)", xTouch, yTouch);
+
+            synchronized (this.circles) {
+                for (Circle circle : this.circles) {
+                    circle.emitTouchEvent(xTouch, yTouch);
+                }
             }
         }
+
+        invalidate();*/
+
         return true;
     }
 
     public void startEngine() {
         holder = getHolder();
+        holder.setKeepScreenOn(true);
         holder.addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder surfaceHolder) {
                 //Only start the game engine when the surface has been created
                 if(gameEngine != null && !gameEngine.isRunning()) {
                     try {
+                        Engine tempEngine = new Engine(GameSurfaceView.this);
+                        tempEngine.setTicksPerSecond(gameEngine.getTicksPerSecond());
+                        tempEngine.setDims(gameEngine.getWidth(), gameEngine.getHeight());
+                        tempEngine.setCurrentView(gameEngine.getCurrentView());
+                        if(gameEngine.isPaused()) {
+                            tempEngine.pauseEngine();
+                        } else {
+                            tempEngine.resumeEngine();
+                        }
+                        gameEngine.killEngine();
+                        gameEngine = tempEngine;
                         gameEngine.startEngine();
                         gameEngine.setDims(getWidth(), getHeight());
+
+                        EventEngine tempEventEngine = new EventEngine();
+                        tempEventEngine.setTicksPerSecond(eventEngine.getTicksPerSecond());
+                        tempEventEngine.setTickEvents(eventEngine.getTickEvents());
+                        tempEventEngine.setCurrentEngine(eventEngine.getCurrentEngine());
+                        if(eventEngine.isPaused()) {
+                            tempEventEngine.pauseEngine();
+                        } else {
+                            tempEventEngine.resumeEngine();
+                        }
+                        eventEngine.killEngine();
+                        eventEngine = tempEventEngine;
+                        eventEngine.pauseEngine();
+                        eventEngine.startEngine();
                     } catch (Exception err){
                         Logger.LogError("Failed to start game engine!");
                         err.printStackTrace();
@@ -297,30 +373,54 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
 
             @Override
             public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
-
+                Logger.Log("GameSurfaceView changed (x: %d, y: %d)", i1, i2);
             }
 
             @Override
             public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
                 //Destroy the engine so that it doesn't call anymore events to the canvas
                 pauseEngine();
+                cleanUpSurface();
             }
         });
+        exists = true;
+    }
+
+    public void cleanUpSurface() {
+        this.paused = true;
+        this.gameEngine.pauseEngine();
+        this.eventEngine.pauseEngine();
+        holder = null;
+        exists = false;
+    }
+
+    public boolean exists() {
+        return this.exists;
+    }
+
+    public boolean isPaused() {
+        return this.gameEngine.isPaused();
     }
 
     public void pauseEngine() {
+        Logger.Log("Pausing the engines!");
         this.paused = true;
         this.gameEngine.pauseEngine();
+        this.eventEngine.pauseEngine();
         if(engineEventCallbacks != null) engineEventCallbacks.onPaused();
     }
 
     public void resumeEngine() {
+        Logger.Log("Resuming the engines!");
         this.paused = false;
         this.gameEngine.resumeEngine();
+        this.eventEngine.resumeEngine();
     }
 
     public void destroyEngine() {
+        Logger.Log("Destroying the engines!");
         this.gameEngine.killEngine();
+        this.eventEngine.killEngine();
         if (engineEventCallbacks != null) engineEventCallbacks.onKilled();
     }
 }
