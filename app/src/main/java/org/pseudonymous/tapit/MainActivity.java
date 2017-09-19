@@ -221,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
 
                 circleHandler.setEventsPerSecond(tickerSpeed);
 
-                int circleCount = ThreadLocalRandom.current().nextInt(1, 5);
+                int circleCount = ThreadLocalRandom.current().nextInt(1, 1);
                 float circleSize = 0.2f; // 0.6f / circleCount;
                 int waitTime = 800; //600 * circleCount;
 //                if(waitTime < 2000) waitTime = 2000;
