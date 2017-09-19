@@ -5,15 +5,40 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:screenOrientation="portrait"
-    android:background="@color/colorSecondary"
+    android:background="@color/colorPrimaryDark"
     android:visibility="visible">
 
-    <View
-        android:layout_width="match_parent"
-        app:layout_heightPercent="25%">
-        <org.pseudonymous.tapit.components.SettingsRectangle />
 
-    </View>
+    <View
+        android:id="@+id/easyButton"
+        app:layout_widthPercent="33.33%"
+        app:layout_heightPercent="20%"
+        android:background="@color/green"/>
+    <View
+        android:id="@+id/mediumButton"
+        app:layout_widthPercent="33.33%"
+        app:layout_heightPercent="20%"
+        android:layout_toRightOf="@id/easyButton"
+        android:background="@color/orange"/>
+    <View
+        android:id="@+id/hardButton"
+        app:layout_widthPercent="33.33%"
+        app:layout_heightPercent="20%"
+        android:layout_toRightOf="@id/mediumButton"
+        android:background="@color/red"/>
+    <View
+        android:id="@+id/soundButton"
+        app:layout_widthPercent="50%"
+        app:layout_heightPercent="20%"
+        android:layout_below="@id/easyButton"
+        android:background="@color/blue"/>
+    <View
+        android:id="@+id/vibrationButton"
+        app:layout_widthPercent="50%"
+        app:layout_heightPercent="20%"
+        android:layout_toRightOf="@id/soundButton"
+        android:layout_below="@id/hardButton"
+        android:background="@color/brown"/>
 
     <!--<view-->
         <!--android:id="@+id/difficultyBar"-->
