@@ -31,18 +31,27 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
     private final List<TickEvent> tickEvents = new CopyOnWriteArrayList<>();
     private final List<Circle> circles = new CopyOnWriteArrayList<>();
     private volatile int backgroundColor;
-    private volatile long circleId = 0;
+    private volatile long circleId = 0, waveCircleCount = 0, circlesClicked = 0;
     private volatile float padding = 0.09f;
     private volatile boolean paused = false, exists = false;
 
     public enum GameMode {
+        RANDOM, WAVE
+    }
+
+    public enum Difficulty {
+        EASY, MEDIUM, HARD
+    }
+
+    public enum GenerationMode {
         RANDOM, TRIANGLE, SQUARE, POLYGON, POLYGON_STATIC
     }
 
     public interface PlayerEvents {
-        void onClicked(Circle circle);
-        void onDestroyed(Circle circle);
-        void onBackgroundTouch(PointF position);
+        void onClicked(Circle circle, GameMode gameMode, Difficulty difficulty);
+        void onWaveCompleted(GameMode gameMode, Difficulty difficulty);
+        void onDestroyed(Circle circle, GameMode gameMode, Difficulty difficulty);
+        void onBackgroundTouch(PointF position, GameMode gameMode, Difficulty difficulty);
     }
 
     public interface EngineEvents {
@@ -52,7 +61,9 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
         void onKilled();
     }
 
-    private GameMode gameMode = GameMode.TRIANGLE;
+    private GameMode gameMode = GameMode.WAVE;
+    private GenerationMode generationMode = GenerationMode.TRIANGLE;
+    private Difficulty difficulty = Difficulty.EASY;
     private PlayerEvents playerEvents = null;
     private EngineEvents engineEventCallbacks = null;
 
@@ -114,6 +125,26 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
         this.gameMode = gameMode;
     }
 
+    public void setGenerationMode(GenerationMode generationMode) {
+        this.generationMode = generationMode;
+    }
+
+    public void setDifficulty(Difficulty difficulty) {
+        this.difficulty = difficulty;
+    }
+
+    public GameMode getGameMode() {
+        return this.gameMode;
+    }
+
+    public GenerationMode getGenerationMode() {
+        return this.generationMode;
+    }
+
+    public Difficulty getDifficulty() {
+        return this.difficulty;
+    }
+
     public void removeCircle(long id) {
         synchronized (this.circles) {
             for (int ind = 0; ind < this.circles.size(); ind++) {
@@ -128,13 +159,23 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
         c.setCircleEvents(new Circle.CircleEvents() {
             @Override
             public void onClick(Circle circle) {
-                if(playerEvents != null) playerEvents.onClicked(circle);
+                switch(gameMode) {
+                    case RANDOM:
+                        if(playerEvents != null) playerEvents.onClicked(circle, gameMode, difficulty);
+                        break;
+                    case WAVE:
+                        if(circlesClicked >= waveCircleCount) {
+                            Logger.Log("Wave completed! (Circles: %d)", circlesClicked);
+                            if(playerEvents != null) playerEvents.onWaveCompleted(gameMode, difficulty);
+                        }
+                        break;
+                };
             }
 
             @Override
             public void onDestroyed(Circle circle) {
                 removeCircle(circle.getCircleId());
-                if(playerEvents != null) playerEvents.onDestroyed(circle);
+                if(playerEvents != null) playerEvents.onDestroyed(circle, gameMode, difficulty);
             }
 
             @Override
@@ -150,15 +191,20 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
     }
 
     public void addCircles(CircleProps []circles) {
-        if(gameMode != GameMode.RANDOM) {
+        if(this.generationMode != GenerationMode.RANDOM) {
             this.clearAllCircles();
         } else {
             this.garbageCollectCircles();
         }
 
+        if(this.gameMode == GameMode.WAVE) {
+            this.waveCircleCount = circles.length;
+            this.circlesClicked = 0;
+        }
+
         PositionEngine positionEngine = new PositionEngine(this.gameEngine);
 
-        switch (gameMode) {
+        switch (this.generationMode) {
             case TRIANGLE:
                 positionEngine.setSides(3);
                 break;
@@ -180,7 +226,7 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
             circle.setMaxScaledRadius(props.getRadius());
             int sR = circle.getMaxRadius();
 
-            switch(gameMode) {
+            switch(this.generationMode) {
                 case RANDOM:
                     //Set the location of the circle before starting the animation
                     boolean passed = false;
@@ -285,7 +331,7 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
                         PointF pF = new PointF();
                         pF.x = xTouch;
                         pF.y = yTouch;
-                        if(this.playerEvents != null) this.playerEvents.onBackgroundTouch(pF);
+                        if(this.playerEvents != null) this.playerEvents.onBackgroundTouch(pF, this.gameMode, this.difficulty);
                     }
                 }
                 break;

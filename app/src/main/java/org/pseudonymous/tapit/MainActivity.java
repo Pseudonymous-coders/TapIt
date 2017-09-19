@@ -172,7 +172,9 @@ public class MainActivity extends AppCompatActivity {
         game = findViewById(R.id.game_view);
         game.setTicksPerSecond(60);
         game.setBackgroundColor(Configs.getColor(R.color.colorPrimary, this));
-        game.setGameMode(GameSurfaceView.GameMode.POLYGON);
+        game.setGameMode(GameSurfaceView.GameMode.WAVE);
+        game.setGenerationMode(GameSurfaceView.GenerationMode.POLYGON);
+        game.setDifficulty(GameSurfaceView.Difficulty.EASY);
 
         startGame();
     }
@@ -243,7 +245,7 @@ public class MainActivity extends AppCompatActivity {
         game.addTickEvent(circleHandler);
         game.setPlayerCallbacks(new GameSurfaceView.PlayerEvents() {
             @Override
-            public void onClicked(Circle circle) {
+            public void onClicked(Circle circle, GameSurfaceView.GameMode gameMode, GameSurfaceView.Difficulty difficulty) {
                 currentScore.incrementScore(); //Add one to the current score
 
                 if(currentScore.getScore() > highScore.getScore()) {
@@ -252,12 +254,17 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onDestroyed(Circle circle) {
+            public void onWaveCompleted(GameSurfaceView.GameMode gameMode, GameSurfaceView.Difficulty difficulty) {
+                
+            }
+
+            @Override
+            public void onDestroyed(Circle circle, GameSurfaceView.GameMode gameMode, GameSurfaceView.Difficulty difficulty) {
                 endGame();
             }
 
             @Override
-            public void onBackgroundTouch(PointF position) {
+            public void onBackgroundTouch(PointF position, GameSurfaceView.GameMode gameMode, GameSurfaceView.Difficulty difficulty) {
                 endGame();
             }
         });
