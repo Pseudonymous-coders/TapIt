@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
 
         //Define the start button and its click operation
         startButton = findViewById(R.id.start_button);
-        startButton.setBackgroundColor(Configs.getColor(R.color.green, this));
+        startButton.setBackgroundColor(Configs.getColor(R.color.colorSecondary, this));
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
         menuButton = findViewById(R.id.menu_button);
         menuButton.setMinAutoPullDown(0.25f); //The arrow must pass 25% of the screen for the window to pull down
         menuButton.setBottomLocation(0.93f); //What percent of the screen should the bottom menu arrow be at
-        menuButton.setTints(Configs.getColor(R.color.green, this), Configs.getColor(R.color.colorPrimaryDark, this));
+        menuButton.setTints(Configs.getColor(R.color.colorSecondary, this), Configs.getColor(R.color.colorPrimary, this));
         menuButton.setButtonImage(Configs.getBitmap(R.drawable.more, this));
         menuButton.setPullDownEvents(new DraggableImageButton.PullDownEvents() {
             @Override
@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void moved(float displacement, boolean downDirection) {
-                float buttonDisplacement = (startButton.getTop() - (windowHeight * 0.125f));
+                float buttonDisplacement = (startButton.getTop() - (windowHeight * 0.02f));
                 menuPanel.setTranslationY(displacement - windowHeight);
 
                 //Move the start button with the menu pulldown
@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
         //Load the game surface view
         game = findViewById(R.id.game_view);
         game.setTicksPerSecond(60);
-        game.setBackgroundColor(Configs.getColor(R.color.colorPrimaryDark, this));
+        game.setBackgroundColor(Configs.getColor(R.color.colorPrimary, this));
         game.setGameMode(GameSurfaceView.GameMode.POLYGON);
 
         startGame();
@@ -226,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
                 int waitTime = 800; //600 * circleCount;
 //                if(waitTime < 2000) waitTime = 2000;
 
-                CircleProps prop = new CircleProps(Configs.getColor(R.color.green, MainActivity.this), circleSize, waitTime);
+                CircleProps prop = new CircleProps(Configs.getColor(R.color.circleColor, MainActivity.this), circleSize, waitTime);
                 CircleProps props[] = new CircleProps[circleCount];
                 for(int ind = 0; ind < props.length; ind++) {
                     props[ind] = prop;

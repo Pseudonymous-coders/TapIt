@@ -5,36 +5,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:screenOrientation="portrait"
-    android:background="@color/green"
-    android:visibility="invisible">
+    android:background="@color/colorSecondary"
+    android:visibility="visible">
 
-    <!--
-    <Button
+    <org.pseudonymous.tapit.components.SettingsButton
         android:id="@+id/restartButton"
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         app:layout_heightPercent="20%"
         android:theme="@style/restartButton"
-        android:text="Restart"
-    />-->
+        android:text="Restart" />
 
-    <org.pseudonymous.tapit.components.TimeBar
-        android:id="@+id/time_bar2"
-        android:layout_alignParentTop="true"
-        android:layout_height="200dp"
-        app:layout_widthPercent="100%"
-        app:bar_color="@color/grey"
-        app:slide_to="right"
-        />
-
-    <TextView
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:layout_below="@+id/time_bar2"
-        android:layout_centerHorizontal="true"
-        android:gravity="center"
-        android:text="YAAY A MENU"
-        android:textAlignment="center"
-        android:textColor="@color/grey"
-        android:textSize="24sp" />
+    <!--<view-->
+        <!--android:id="@+id/difficultyBar"-->
+        <!--android:layout_width="match_parent"-->
+        <!--app:layout_heightPercent="20%"-->
+        <!--android:layout_below="@id/restartButton">-->
+    <!--</view>-->
 
 </android.support.percent.PercentRelativeLayout>

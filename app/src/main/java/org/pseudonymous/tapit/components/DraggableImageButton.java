@@ -239,11 +239,13 @@ public class DraggableImageButton extends android.support.v7.widget.AppCompatIma
                 setDownTint();
                 imageDown();
 
-                if(!downDirection) {
-                    slideToFirstHome();
-                }
+                boolean tempDirection = downDirection;
 
                 downDirection = true;
+
+                if(!tempDirection) {
+                    slideToFirstHome();
+                }
                 if(pullDownEvents != null) pullDownEvents.returned(downDirection);
             }
         });
@@ -271,10 +273,16 @@ public class DraggableImageButton extends android.support.v7.widget.AppCompatIma
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 dragState = 1;
+                if(downDirection) {
+                    slideToSecondHome();
+                } else {
+                    slideToFirstHome();
+                }
+
                 downDirection = false;
                 setUpTint();
                 imageUp();
-                slideToSecondHome();
+
                 if(pullDownEvents != null) pullDownEvents.opened(downDirection);
             }
         });

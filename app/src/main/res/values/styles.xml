@@ -16,7 +16,7 @@
     </style>
 
     <style name="baseHeader" parent="android:Widget.TextView">
-        <item name="android:textColor">@color/green</item>
+        <item name="android:textColor">@color/colorSecondary</item>
         <item name="android:fontFamily">sans-serif</item>
     </style>
 
@@ -42,19 +42,22 @@
     
     <style name="baseSettingsButton" parent="Widget.AppCompat.Button.Borderless">
         <item name="android:fontFamily">sans-serif</item>
-        <item name="android:textSize">75sp</item>
+        <item name="android:textSize">50sp</item>
         <item name="android:textColor">@color/almond</item>
     </style>
 
     <style name="restartButton" parent="baseSettingsButton">
         <item name="android:background">@color/green</item>
     </style>
+    <style name="difficultyButton" parent="baseSettingsButton">
+        <item name="android:background">@color/green</item>
+    </style>
 
     <!-- The theme of the start button on the user frame -->
     <style name="StartButton" parent="Widget.AppCompat.Button.Borderless">
-        <item name="android:colorButtonNormal">@color/green</item>
-        <item name="android:colorControlHighlight">@color/green</item>
-        <item name="android:textColor">@color/colorPrimaryDark</item>
+        <item name="android:colorButtonNormal">@color/colorSecondary</item>
+        <item name="android:colorControlHighlight">@color/colorSecondary</item>
+        <item name="android:textColor">@color/colorPrimaryDarkText</item>
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:textSize">50sp</item>
         <item name="android:background">?android:attr/selectableItemBackground</item>
