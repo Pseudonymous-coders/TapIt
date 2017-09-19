@@ -8,12 +8,12 @@
     android:background="@color/colorSecondary"
     android:visibility="visible">
 
-    <org.pseudonymous.tapit.components.SettingsButton
-        android:id="@+id/restartButton"
-        android:layout_width="fill_parent"
-        app:layout_heightPercent="20%"
-        android:theme="@style/restartButton"
-        android:text="Restart" />
+    <View
+        android:layout_width="match_parent"
+        app:layout_heightPercent="25%">
+        <org.pseudonymous.tapit.components.SettingsRectangle />
+
+    </View>
 
     <!--<view-->
         <!--android:id="@+id/difficultyBar"-->
