@@ -43,7 +43,7 @@
     <style name="baseSettingsButton" parent="Widget.AppCompat.Button.Borderless">
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:textSize">50sp</item>
-        <item name="android:textColor">@color/almond</item>
+        <item name="android:textColor">@color/light_brown</item>
     </style>
 
     <style name="restartButton" parent="baseSettingsButton">

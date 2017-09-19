@@ -6,13 +6,12 @@
     <color name="colorPrimaryDarkText">#3B3E47</color>
     <color name="colorTertiary">#5A4A4A</color>
     <color name="colorCircle">@color/colorSecondary</color>
-    <color name="green">#86b817</color>
-    <color name="circleColor">@color/colorSecondary</color>
-    <color name="red">#d84315</color>
-    <color name="tan">#D7CCC8</color>
-    <color name="grey">#66000000</color>
-    <color name="light_blue">#81D4FA</color>
-    <color name="brown">#D7CCC8</color>
-    <color name="almond">#fafafa</color>
-    <color name="white">#fff</color>
+    <color name="green">#66BB6A</color>
+    <color name="yellow">#FFF176</color>
+    <color name="orange">#FFB74D</color>
+    <color name="red">#EF5350</color>
+    <color name="blue">#29B6F6</color>
+    <color name="brown">#8D6E63</color>
+    <color name="light_brown">#EFEBE9</color>
+    <color name="white">#FFF</color>
 </resources>

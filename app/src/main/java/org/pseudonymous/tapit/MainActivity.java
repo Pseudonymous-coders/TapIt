@@ -228,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
                 int waitTime = 800; //600 * circleCount;
 //                if(waitTime < 2000) waitTime = 2000;
 
-                CircleProps prop = new CircleProps(Configs.getColor(R.color.circleColor, MainActivity.this), circleSize, waitTime);
+                CircleProps prop = new CircleProps(Configs.getColor(R.color.colorCircle, MainActivity.this), circleSize, waitTime);
                 CircleProps props[] = new CircleProps[circleCount];
                 for(int ind = 0; ind < props.length; ind++) {
                     props[ind] = prop;
