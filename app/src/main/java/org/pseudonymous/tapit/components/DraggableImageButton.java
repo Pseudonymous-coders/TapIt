@@ -6,17 +6,15 @@ import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Interpolator;
 import android.graphics.Matrix;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.RotateDrawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 
 import org.pseudonymous.tapit.configs.Logger;
@@ -27,11 +25,12 @@ import org.pseudonymous.tapit.configs.Logger;
  */
 
 public class DraggableImageButton extends android.support.v7.widget.AppCompatImageButton implements View.OnTouchListener{
-    private float curY;
-    private ValueAnimator animator;
-    private float minAutoPullDown = 0.6f, bottomLocation = 0.90f;
+    private float curY, minAutoPullDown = 0.6f, bottomLocation = 0.90f, velocity = 0;
     private int dragState = 0, windowHeight, downTint, upTint;
     private boolean downDirection = true, stayedAtHome = false;
+    private long animationDuration = 2000, maxVelocity = 10000, minDuration = 100;
+    private ValueAnimator animator;
+    private VelocityTracker velocityTracker = null;
     private Matrix rotateMatrix = new Matrix();
     private Bitmap buttonImage;
 
@@ -129,53 +128,99 @@ public class DraggableImageButton extends android.support.v7.widget.AppCompatIma
         switch (action) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_POINTER_DOWN: {
-                curY = rawY;
+                this.curY = rawY;
                 this.stayedAtHome = true;
-                if (pullDownEvents != null) windowHeight = pullDownEvents.started(downDirection);
+
+                if(this.velocityTracker == null) {
+                    this.velocityTracker = VelocityTracker.obtain();
+                } else {
+                    this.velocityTracker.clear();
+                }
+
+                this.velocityTracker.addMovement(motionEvent);
+
+                if (this.pullDownEvents != null) this.windowHeight = this.pullDownEvents.started(this.downDirection);
                 break;
             }
 
             case MotionEvent.ACTION_MOVE: {
-                float disp = (rawY - curY);
+                float disp = (rawY - this.curY);
 
-                if(disp > (this.windowHeight * (this.minAutoPullDown / 2))) {
-                    this.stayedAtHome = false;
-                }
-
-                if(downDirection) {
+                if(this.downDirection) {
                     setTranslationY(disp);
+                    if(disp > (this.windowHeight * (this.minAutoPullDown / 15))) {
+                        this.stayedAtHome = false;
+                    }
+                    if(disp < 0) disp = 0;
                 } else {
                     setTranslationY((this.windowHeight * this.bottomLocation) + disp);
-                    disp = windowHeight + disp;
+                    disp = this.windowHeight + disp;
+                    if(disp < this.windowHeight - (this.windowHeight * (this.minAutoPullDown / 15))) {
+                        this.stayedAtHome = false;
+                    }
+                    if(disp > this.windowHeight) disp = this.windowHeight;
                 }
-                if(pullDownEvents != null) pullDownEvents.moved(disp, downDirection);
+
+                this.velocityTracker.addMovement(motionEvent);
+                this.velocityTracker.computeCurrentVelocity(1000);
+
+                if(this.pullDownEvents != null) this.pullDownEvents.moved(disp, this.downDirection);
                 break;
             }
 
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_POINTER_UP: {
-                if(stayedAtHome) {
-                    Logger.Log("The menu button was clicked on!");
-                    if(downDirection) {
-                        this.slideDown();
-                    } else {
-                        this.slideUp();
-                    }
-                    return true;
-                }
+                this.velocity = 0;
+                boolean passed = false;
 
-                if(downDirection) {
-                    if (rawY > (windowHeight * minAutoPullDown)) {
-                        this.slideDown();
-                    } else {
-                        this.slideUp();
+                if(this.downDirection) {
+                    if((rawY / this.curY) < 0.5) {
+                        this.slideToFirstHome();
+                        passed = true;
                     }
                 } else {
-                    if (rawY < windowHeight - (windowHeight * minAutoPullDown)) {
-                        this.slideUp();
-                    } else {
-                        this.slideDown();
+                    if((this.curY / rawY) < 0.98) {
+                        this.slideToSecondHome();
+                        passed = true;
                     }
+                }
+
+                if(!passed) {
+                    if (stayedAtHome) {
+                        Logger.Log("The menu button was clicked on!");
+                        if (downDirection) {
+                            this.slideDown();
+                        } else {
+                            this.slideUp();
+                        }
+                        passed = true;
+                    }
+                }
+
+                if(!passed) {
+                    if (this.velocityTracker != null) {
+                        this.velocity = this.velocityTracker.getYVelocity();
+                    }
+
+                    if (this.downDirection) {
+                        if (rawY > (this.windowHeight * this.minAutoPullDown)) {
+                            this.slideDown();
+                        } else {
+                            this.velocity = 0;
+                            this.slideUp();
+                        }
+                    } else {
+                        if (rawY < this.windowHeight - (this.windowHeight * this.minAutoPullDown)) {
+                            this.slideUp();
+                        } else {
+                            this.velocity = 0;
+                            this.slideDown();
+                        }
+                    }
+                }
+
+                if(this.velocityTracker != null) {
+                    this.velocityTracker.clear();
                 }
                 break;
             }
@@ -205,6 +250,7 @@ public class DraggableImageButton extends android.support.v7.widget.AppCompatIma
 
     private void setSlideAnimationProps() {
         this.setAnimtorProps(1500, new AccelerateDecelerateInterpolator());
+        this.setVelocitySubtraction();
     }
 
     private void setButtonAnimationProps() {
@@ -214,19 +260,34 @@ public class DraggableImageButton extends android.support.v7.widget.AppCompatIma
     private void setAnimtorProps(long duration, TimeInterpolator interpolator) {
         this.animator.setInterpolator(interpolator);
         this.animator.setDuration(duration);
+        this.animationDuration = duration;
+
+    }
+
+    private void setVelocitySubtraction() {
+        long finalVelocity = Math.round(Math.abs(this.velocity));
+        if(finalVelocity > this.maxVelocity) finalVelocity = this.maxVelocity;
+        long newDuration = this.animationDuration - finalVelocity;
+        if(newDuration < this.minDuration) newDuration = this.minDuration;
+        if(newDuration > (this.animationDuration / 2) && finalVelocity > 1) {
+            this.animator.setInterpolator(new DecelerateInterpolator());
+        }
+        this.animator.setDuration(newDuration);
     }
 
     public void slideUp() {
         this.stopAnimator();
-        final float smallDiscrepancyFix = windowHeight * (1 - this.bottomLocation);
+        final float smallDiscrepancyFix = this.windowHeight * (1 - this.bottomLocation);
+        final boolean incompleteSlide = this.getY() < (this.windowHeight * this.minAutoPullDown);
         this.animator = ValueAnimator.ofFloat(this.getTranslationY() , -smallDiscrepancyFix);
         this.setSlideAnimationProps();
+
 
         this.animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 float disp = (float) valueAnimator.getAnimatedValue();
-                setTranslationY(disp);
+                setTranslationY((incompleteSlide) ? disp + smallDiscrepancyFix : disp);
                 if(pullDownEvents != null) pullDownEvents.moved(disp + smallDiscrepancyFix, downDirection);
             }
         });
@@ -239,13 +300,9 @@ public class DraggableImageButton extends android.support.v7.widget.AppCompatIma
                 setDownTint();
                 imageDown();
 
-                boolean tempDirection = downDirection;
-
                 downDirection = true;
+                if(!incompleteSlide) slideToFirstHome();
 
-                if(!tempDirection) {
-                    slideToFirstHome();
-                }
                 if(pullDownEvents != null) pullDownEvents.returned(downDirection);
             }
         });
@@ -256,7 +313,8 @@ public class DraggableImageButton extends android.support.v7.widget.AppCompatIma
 
     public void slideDown() {
         this.stopAnimator();
-        this.animator = ValueAnimator.ofFloat(this.getTranslationY(), (windowHeight == 0) ? curY : windowHeight);
+        final boolean incompleteSlide = this.getY() > this.windowHeight - (this.windowHeight * this.minAutoPullDown);
+        this.animator = ValueAnimator.ofFloat(this.getTranslationY(), (this.windowHeight == 0) ? this.curY : this.windowHeight);
         this.setSlideAnimationProps();
 
         this.animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -273,15 +331,12 @@ public class DraggableImageButton extends android.support.v7.widget.AppCompatIma
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 dragState = 1;
-                if(downDirection) {
-                    slideToSecondHome();
-                } else {
-                    slideToFirstHome();
-                }
 
                 downDirection = false;
                 setUpTint();
                 imageUp();
+
+                if(!incompleteSlide) slideToSecondHome();
 
                 if(pullDownEvents != null) pullDownEvents.opened(downDirection);
             }
