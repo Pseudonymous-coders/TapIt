@@ -107,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
             public void returned(boolean downDirection) {
                 if(downDirection) {
                     menuPanel.setVisibility(View.INVISIBLE);
+                    game.setVisibility(View.VISIBLE);
                     menuPanel.setTranslationY(0);
                     Logger.Log("Hiding menu panel");
 
@@ -142,6 +143,8 @@ public class MainActivity extends AppCompatActivity {
                     if (playingWhileMenuPullDown) {
                         game.pauseEngine();
                     }
+
+                    game.setVisibility(View.INVISIBLE);
                 } else {
                     startButton.setVisibility(View.VISIBLE);
                     game.setVisibility(View.VISIBLE);
@@ -172,7 +175,6 @@ public class MainActivity extends AppCompatActivity {
             public void opened(boolean downDirection) {
                 if(downDirection) {
                     startButton.setVisibility(View.INVISIBLE);
-                    game.setVisibility(View.INVISIBLE);
                     Logger.Log("The menu panel is open!");
                     isMenuShown = true;
                 } else {
@@ -285,13 +287,13 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onBackgroundTouch(PointF position, GameSurfaceView.GameMode gameMode, GameSurfaceView.Difficulty difficulty) {
-                switch(difficult) {
+                switch(difficulty) {
                     case EASY:
                         break;
                     case MEDIUM:
                         break;
                     case HARD:
-                        Logger.Log("The background was touched on hard);
+                        Logger.Log("The background was touched on hard");
                         endGame();
                         break;
                 }

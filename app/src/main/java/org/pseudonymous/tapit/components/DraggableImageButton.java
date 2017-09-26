@@ -26,9 +26,15 @@ import org.pseudonymous.tapit.configs.Logger;
 
 public class DraggableImageButton extends android.support.v7.widget.AppCompatImageButton implements View.OnTouchListener{
     private float curY, minAutoPullDown = 0.6f, bottomLocation = 0.90f, velocity = 0;
-    private int dragState = 0, windowHeight, downTint, upTint;
+    private int dragState = 0, windowHeight = -1, downTint, upTint;
     private boolean downDirection = true, stayedAtHome = false;
-    private long animationDuration = 2000, maxVelocity = 10000, minDuration = 100;
+    private long
+            animationStartTime = -1,
+            animationDuration = 2000,
+            maxVelocity = 10000,
+            minDuration = 100,
+            slideAnimationDuration = 1500,
+            homeAnimationDuration = 800;
     private ValueAnimator animator;
     private VelocityTracker velocityTracker = null;
     private Matrix rotateMatrix = new Matrix();
@@ -64,6 +70,48 @@ public class DraggableImageButton extends android.support.v7.widget.AppCompatIma
         this.bringToFront();
         this.setOnTouchListener(this);
         this.setScaleType(ScaleType.MATRIX);
+
+        Thread onScreenChecker = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(true) {
+                    try {
+                        if(!((System.currentTimeMillis() - animationStartTime) < animationDuration || animationStartTime < 1)) {
+                            if (getY() < 0 && windowHeight > 0) {
+                                Logger.LogError("Button went off the top side of the screen! Fixing the mistake...");
+                                dragState = 0;
+                                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        imageDown();
+                                        setDownTint();
+                                    }
+                                });
+                                slideToFirstHome();
+                            } else if (getY() > (windowHeight * (bottomLocation + 0.01)) && windowHeight > 0) {
+                                Logger.LogError("Button went off the bottom side of the screen! Fixing the mistake...");
+                                dragState = 0;
+                                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        imageUp();
+                                        setUpTint();
+                                    }
+                                });
+                                slideToSecondHome();
+                            }
+                        }
+                        Thread.sleep(slideAnimationDuration / 2);
+                    } catch (Throwable err) {
+                        err.printStackTrace();
+                        Logger.LogError("Failed checking if the draggable menu is on screen");
+                        break;
+                    }
+                }
+            }
+        });
+        onScreenChecker.setDaemon(true);
+        onScreenChecker.start();
     }
 
     public void setPullDownEvents(PullDownEvents pullDownEvents) {
@@ -130,6 +178,7 @@ public class DraggableImageButton extends android.support.v7.widget.AppCompatIma
             case MotionEvent.ACTION_POINTER_DOWN: {
                 this.curY = rawY;
                 this.stayedAtHome = true;
+                this.animationStartTime = System.currentTimeMillis();
 
                 if(this.velocityTracker == null) {
                     this.velocityTracker = VelocityTracker.obtain();
@@ -144,6 +193,7 @@ public class DraggableImageButton extends android.support.v7.widget.AppCompatIma
             }
 
             case MotionEvent.ACTION_MOVE: {
+                this.animationStartTime = System.currentTimeMillis();
                 float disp = (rawY - this.curY);
 
                 if(this.downDirection) {
@@ -240,6 +290,7 @@ public class DraggableImageButton extends android.support.v7.widget.AppCompatIma
     }
 
     private void startAnimator() {
+        this.animationStartTime = System.currentTimeMillis();
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
@@ -249,12 +300,12 @@ public class DraggableImageButton extends android.support.v7.widget.AppCompatIma
     }
 
     private void setSlideAnimationProps() {
-        this.setAnimtorProps(1500, new AccelerateDecelerateInterpolator());
+        this.setAnimtorProps(slideAnimationDuration, new AccelerateDecelerateInterpolator());
         this.setVelocitySubtraction();
     }
 
     private void setButtonAnimationProps() {
-        this.setAnimtorProps(800, new LinearInterpolator());
+        this.setAnimtorProps(homeAnimationDuration, new LinearInterpolator());
     }
 
     private void setAnimtorProps(long duration, TimeInterpolator interpolator) {

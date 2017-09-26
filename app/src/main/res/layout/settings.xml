@@ -10,49 +10,17 @@
 
 
     <ImageView
-        android:id="@+id/easyButton"
-        app:layout_widthPercent="33.33%"
+        android:id="@+id/difficultyButton"
+        app:layout_widthPercent="75%"
         app:layout_heightPercent="20%"
         android:src="@drawable/easy"
-        android:onClick="difficultyEasy"
         android:background="@color/green"/>
     <ImageView
-        android:id="@+id/mediumButton"
-        app:layout_widthPercent="33.33%"
-        app:layout_heightPercent="20%"
-        android:layout_toRightOf="@id/easyButton"
-        android:src="@drawable/medium"
-        android:onClick="difficultyMedium"
-        android:background="@color/orange"/>
-    <ImageView
-        android:id="@+id/hardButton"
-        app:layout_widthPercent="33.33%"
-        app:layout_heightPercent="20%"
-        android:layout_toRightOf="@id/mediumButton"
-        android:src="@drawable/hard"
-        android:onClick="difficultyHard"
-        android:background="@color/red"/>
-    <ImageView
         android:id="@+id/soundButton"
-        app:layout_widthPercent="50%"
+        app:layout_widthPercent="25%"
         app:layout_heightPercent="20%"
-        android:layout_below="@id/easyButton"
+        android:layout_toRightOf="@id/difficultyButton"
         android:src="@drawable/vol_off"
         android:background="@color/blue"/>
-    <ImageView
-        android:id="@+id/vibrationButton"
-        app:layout_widthPercent="50%"
-        app:layout_heightPercent="20%"
-        android:layout_toRightOf="@id/soundButton"
-        android:layout_below="@id/hardButton"
-        android:src="@drawable/vibrate"
-        android:background="@color/brown"/>
-
-    <!--<view-->
-        <!--android:id="@+id/difficultyBar"-->
-        <!--android:layout_width="match_parent"-->
-        <!--app:layout_heightPercent="20%"-->
-        <!--android:layout_below="@id/restartButton">-->
-    <!--</view>-->
 
 </android.support.percent.PercentRelativeLayout>
