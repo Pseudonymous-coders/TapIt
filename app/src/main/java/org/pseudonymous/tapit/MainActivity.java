@@ -285,7 +285,16 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onBackgroundTouch(PointF position, GameSurfaceView.GameMode gameMode, GameSurfaceView.Difficulty difficulty) {
-                endGame();
+                switch(difficult) {
+                    case EASY:
+                        break;
+                    case MEDIUM:
+                        break;
+                    case HARD:
+                        Logger.Log("The background was touched on hard);
+                        endGame();
+                        break;
+                }
             }
         });
 
