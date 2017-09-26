@@ -164,6 +164,7 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
                         if(playerEvents != null) playerEvents.onClicked(circle, gameMode, difficulty);
                         break;
                     case WAVE:
+                        circlesClicked++;
                         if(circlesClicked >= waveCircleCount) {
                             Logger.Log("Wave completed! (Circles: %d)", circlesClicked);
                             if(playerEvents != null) playerEvents.onWaveCompleted(gameMode, difficulty);

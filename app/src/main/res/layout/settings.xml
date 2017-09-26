@@ -14,6 +14,7 @@
         app:layout_widthPercent="33.33%"
         app:layout_heightPercent="20%"
         android:src="@drawable/easy"
+        android:onClick="difficultyEasy"
         android:background="@color/green"/>
     <ImageView
         android:id="@+id/mediumButton"
@@ -21,6 +22,7 @@
         app:layout_heightPercent="20%"
         android:layout_toRightOf="@id/easyButton"
         android:src="@drawable/medium"
+        android:onClick="difficultyMedium"
         android:background="@color/orange"/>
     <ImageView
         android:id="@+id/hardButton"
@@ -28,6 +30,7 @@
         app:layout_heightPercent="20%"
         android:layout_toRightOf="@id/mediumButton"
         android:src="@drawable/hard"
+        android:onClick="difficultyHard"
         android:background="@color/red"/>
     <ImageView
         android:id="@+id/soundButton"

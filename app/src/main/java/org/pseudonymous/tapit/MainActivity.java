@@ -27,6 +27,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * status bar and navigation/system bar) with user interaction.
  */
 public class MainActivity extends AppCompatActivity {
+    private static final String PREFS_NAME = "preferences";
     private StartButton startButton;
     private ScoreText currentScore, highScore;
     private TimeBar timeBar;
@@ -246,16 +247,18 @@ public class MainActivity extends AppCompatActivity {
         game.setPlayerCallbacks(new GameSurfaceView.PlayerEvents() {
             @Override
             public void onClicked(Circle circle, GameSurfaceView.GameMode gameMode, GameSurfaceView.Difficulty difficulty) {
-                currentScore.incrementScore(); //Add one to the current score
-
-                if(currentScore.getScore() > highScore.getScore()) {
-                    highScore.setScore(currentScore.getScore());
+                switch (gameMode){
+                    case RANDOM:
+                        incrementScore();
+                        break;
+                    case WAVE:
+                        break;
                 }
             }
 
             @Override
             public void onWaveCompleted(GameSurfaceView.GameMode gameMode, GameSurfaceView.Difficulty difficulty) {
-
+                incrementScore();
             }
 
             @Override
@@ -302,6 +305,27 @@ public class MainActivity extends AppCompatActivity {
         startButton.upAnimation();
     }
 
+    public void difficultyEasy(View v){
+        game.setDifficulty(GameSurfaceView.Difficulty.EASY);
+        endGame();
+    }
+
+    public void difficultyMedium(View v){
+        game.setDifficulty(GameSurfaceView.Difficulty.MEDIUM);
+        endGame();
+    }
+
+    public void difficultyHard(View v){
+        game.setDifficulty(GameSurfaceView.Difficulty.HARD);
+        endGame();
+    }
+
+    private void incrementScore(){
+        currentScore.incrementScore();
+        if (currentScore.getScore() > highScore.getScore()){
+            highScore.setScore(currentScore.getScore());
+        }
+    }
 
     /*// Not working, we need to revise how we draw circles and such...
     private List<Circle> drawCircle(float x, float y, Engine engine, List<Circle> circles){
