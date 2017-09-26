@@ -1,8 +1,11 @@
 package org.pseudonymous.tapit;
 
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PointF;
 import android.os.Bundle;
+import android.preference.Preference;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,14 +23,22 @@ import org.pseudonymous.tapit.engine.Engine;
 import org.pseudonymous.tapit.engine.GameSurfaceView;
 import org.pseudonymous.tapit.engine.TickEvent;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Properties;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.prefs.Preferences;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
 public class MainActivity extends AppCompatActivity {
-    private static final String PREFS_NAME = "preferences";
+    SharedPreferences preferences;
     private StartButton startButton;
     private ScoreText currentScore, highScore;
     private TimeBar timeBar;
@@ -72,12 +83,18 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
         //Define the current and high score text view
         currentScore = findViewById(R.id.cur_score);
         highScore = findViewById(R.id.high_score);
 
+        highScore.setScore(preferences.getInt("highscore", 0));
+
         //Get the custom top progress bar
         timeBar = findViewById(R.id.time_bar);
+
+
 
         //Get the menu pull down icon
         menuButton = findViewById(R.id.menu_button);
@@ -303,6 +320,9 @@ public class MainActivity extends AppCompatActivity {
         game.pauseEngine();
         game.clearAllCircles();
         startButton.upAnimation();
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putInt("highscore", highScore.getScore());
+        editor.apply();
     }
 
     public void difficultyEasy(View v){
