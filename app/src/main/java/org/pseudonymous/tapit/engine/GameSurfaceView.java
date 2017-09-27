@@ -309,6 +309,10 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
         }
     }
 
+    public void drawPaused(Canvas canvas) {
+
+    }
+
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
         if(this.paused) return true;
@@ -449,7 +453,18 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
         return this.gameEngine.isPaused();
     }
 
+    public boolean areEventsPaused() {
+        return this.eventEngine.isPaused();
+    }
+
     public void pauseEngine() {
+        pauseEngine(0);
+    }
+
+    public void pauseEngine(long delay) {
+        try {
+            Thread.sleep(delay);
+        } catch (Throwable ignored) {}
         Logger.Log("Pausing the engines!");
         this.paused = true;
         this.gameEngine.pauseEngine();
@@ -457,10 +472,18 @@ public class GameSurfaceView extends SurfaceView implements View.OnTouchListener
         if(engineEventCallbacks != null) engineEventCallbacks.onPaused();
     }
 
+    public void pauseEvents() {
+        this.eventEngine.pauseEngine();
+    }
+
     public void resumeEngine() {
         Logger.Log("Resuming the engines!");
         this.paused = false;
         this.gameEngine.resumeEngine();
+        this.eventEngine.resumeEngine();
+    }
+
+    public void resumeEvents() {
         this.eventEngine.resumeEngine();
     }
 

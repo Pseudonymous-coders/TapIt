@@ -61,6 +61,7 @@ public class Engine extends Thread {
             if (this.paused) {
                 try {
                     Thread.sleep(100); //Wait for the engine to unpause before we continue to render our next elements
+                    continue;
                 } catch (InterruptedException ignored) {
                     Logger.LogWarning("Killing the engine (Reason: The thread was interrupted)");
                     this.running = false;
@@ -73,7 +74,9 @@ public class Engine extends Thread {
             try {
                 c = view.getHolder().lockCanvas();
                 synchronized (view.getHolder()) { //Make sure no other thread is locked onto the canvas object
-                    view.draw(c);
+                    if(!paused) {
+                        view.draw(c);
+                    }
                 }
             } catch (NullPointerException appClosed) {
                 Logger.LogWarning("Killing the engine (Reason: The Canvas was destroyed)");

@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
 
                     if (playingWhileMenuPullDown) {
                         Logger.Log("The player was recently playing... resuming the engine");
-                        game.resumeEngine();
+                        game.resumeEvents();
                     }
                     isMenuShown = false;
                 } else {
@@ -139,16 +139,16 @@ public class MainActivity extends AppCompatActivity {
                     menuPanel.setLayoutParams(params);
                     Logger.Log("Showing the menu panel");
 
-                    playingWhileMenuPullDown = !game.isPaused();
+                    playingWhileMenuPullDown = !game.areEventsPaused();
                     if (playingWhileMenuPullDown) {
-                        game.pauseEngine();
+                        //game.pauseEvents();
                     }
+                    game.pauseEngine();
 
-                    game.setVisibility(View.INVISIBLE);
+                    menuPanel.requestFocus();
                 } else {
                     startButton.setVisibility(View.VISIBLE);
                     game.setVisibility(View.VISIBLE);
-                    //game.startEngine();
                 }
 
                 return windowHeight;
@@ -174,6 +174,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void opened(boolean downDirection) {
                 if(downDirection) {
+                    game.setVisibility(View.INVISIBLE);
                     startButton.setVisibility(View.INVISIBLE);
                     Logger.Log("The menu panel is open!");
                     isMenuShown = true;
@@ -181,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
                     Logger.Log("The menu panel is closed!");
                     if (playingWhileMenuPullDown) {
                         Logger.Log("The player was recently playing... resuming the engine");
-                        game.resumeEngine();
+                        game.resumeEvents();
                     }
                     isMenuShown = false;
                 }
@@ -261,7 +262,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //Pause the engine before starting it because we don't want the user to see random circles to appear
-        game.pauseEngine();
+        game.resumeEngine();
+        game.pauseEvents();
         game.addTickEvent(circleHandler);
         game.setPlayerCallbacks(new GameSurfaceView.PlayerEvents() {
             @Override
@@ -328,7 +330,8 @@ public class MainActivity extends AppCompatActivity {
     public void endGame() {
         currentScore.setScore(0);
         tickerSpeed = 0.5f;
-        game.pauseEngine();
+        game.pauseEvents();
+        game.pauseEngine(600); //Wait for the circles to be removed from the engine
         game.clearAllCircles();
         startButton.upAnimation();
         SharedPreferences.Editor editor = preferences.edit();
