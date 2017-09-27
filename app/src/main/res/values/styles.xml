@@ -35,10 +35,7 @@
     <style name="HighScore" parent="baseHeader">
         <item name="android:textSize">30sp</item>
     </style>
-    
-    <style name="diffToggle" >
-        <item name="android:textColor">@color/colorPrimaryDark</item>
-    </style>
+
     <style name="settingsTitle">
         <item name="android:textColor">@color/light_brown</item>
         <item name="android:gravity">center</item>
@@ -56,7 +53,6 @@
         <item name="android:background">@color/green</item>
     </style>
     <style name="difficultyButton" parent="baseSettingsButton">
-        <item name="android:background">@color/green</item>
     </style>
 
     <!-- The theme of the start button on the user frame -->

@@ -10,11 +10,42 @@
 
 
     <TextView
-        android:id="@+id/settingsTitle"
+        android:id="@+id/difficultyButton"
+        android:background="#F3BD75"
         android:layout_width="match_parent"
-        app:layout_heightPercent="10%"
-        android:text="SETTINGS"
-        android:theme="@style/settingsTitle"/>
+        app:layout_heightPercent="25%"
+        android:gravity="center"
+        android:text="Difficulty"
+        android:theme="@style/baseSettingsButton"/>
+
+    <TextView
+        android:id="@+id/gamemodeButton"
+        android:background="#FF89AB"
+        android:layout_width="match_parent"
+        app:layout_heightPercent="25%"
+        android:layout_below="@id/difficultyButton"
+        android:gravity="center"
+        android:text="Gamemode"
+        android:theme="@style/baseSettingsButton"/>
+
+    <TextView
+        android:id="@+id/soundButton"
+        android:background="#7FEDEE"
+        android:layout_width="match_parent"
+        app:layout_heightPercent="25%"
+        android:layout_below="@id/gamemodeButton"
+        android:gravity="center"
+        android:text="Sound"
+        android:theme="@style/baseSettingsButton"/>
+    <TextView
+        android:id="@+id/infoButton"
+        android:background="#B5DD7A"
+        android:layout_width="match_parent"
+        app:layout_heightPercent="25%"
+        android:layout_below="@id/soundButton"
+        android:gravity="center"
+        android:text="Info"
+        android:theme="@style/baseSettingsButton"/>
 
     <!--<ImageView-->
         <!--android:id="@+id/difficultyButton"-->
