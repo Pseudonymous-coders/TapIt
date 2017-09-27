@@ -9,18 +9,27 @@
     android:visibility="visible">
 
 
-    <ImageView
-        android:id="@+id/difficultyButton"
-        app:layout_widthPercent="75%"
-        app:layout_heightPercent="20%"
-        android:src="@drawable/easy"
-        android:background="@color/green"/>
-    <ImageView
-        android:id="@+id/soundButton"
-        app:layout_widthPercent="25%"
-        app:layout_heightPercent="20%"
-        android:layout_toRightOf="@id/difficultyButton"
-        android:src="@drawable/vol_off"
-        android:background="@color/blue"/>
+    <TextView
+        android:id="@+id/settingsTitle"
+        android:layout_width="match_parent"
+        app:layout_heightPercent="10%"
+        android:text="SETTINGS"
+        android:theme="@style/settingsTitle"/>
+
+    <!--<ImageView-->
+        <!--android:id="@+id/difficultyButton"-->
+        <!--app:layout_widthPercent="75%"-->
+        <!--app:layout_heightPercent="20%"-->
+        <!--android:src="@drawable/easy"-->
+        <!--android:layout_below="@id/settingsTitle"-->
+        <!--android:background="@color/green"/>-->
+    <!--<ImageView-->
+        <!--android:id="@+id/soundButton"-->
+        <!--app:layout_widthPercent="25%"-->
+        <!--app:layout_heightPercent="20%"-->
+        <!--android:layout_toRightOf="@id/difficultyButton"-->
+        <!--android:layout_below="@id/settingsTitle"-->
+        <!--android:src="@drawable/vol_off"-->
+        <!--android:background="@color/blue"/>-->
 
 </android.support.percent.PercentRelativeLayout>

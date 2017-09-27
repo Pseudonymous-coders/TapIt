@@ -36,8 +36,14 @@
         <item name="android:textSize">30sp</item>
     </style>
     
-    <style name="SettingsCog" parent="android:Widget.ImageButton">
-        <item name="android:background">@color/green</item>
+    <style name="diffToggle" >
+        <item name="android:textColor">@color/colorPrimaryDark</item>
+    </style>
+    <style name="settingsTitle">
+        <item name="android:textColor">@color/light_brown</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">40sp</item>
+        <item name="android:background">@color/colorSecondary</item>
     </style>
     
     <style name="baseSettingsButton" parent="Widget.AppCompat.Button.Borderless">
